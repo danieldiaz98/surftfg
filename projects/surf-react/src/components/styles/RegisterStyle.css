@@ -1,6 +1,3 @@
-/* Centrar el formulario en la pantalla */
-.container {
-  text-align: center;
-  justify-content: center;
-  margin-top: 50px;
+button {
+  margin-top: 20px;
 }

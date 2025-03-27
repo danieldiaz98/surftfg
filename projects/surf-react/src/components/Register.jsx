@@ -4,29 +4,41 @@ import "./styles/RegisterStyle.css"; // Importamos el archivo CSS
 function RegistroUsuario() {
 
   return (
-    <div className="container">
-        <h2>Registro de usuario</h2><br/>
-        
+    <div className="container d-flex justify-content-center align-items-center vh-100">
+      <div className="card shadow-lg p-4" style={{ width: "400px" }}>
+        <h2 className="text-center mb-4">Registro de Usuario</h2>
+
         <form>
-                
-            <label>Nombre</label><br/>
-            <input type="text" className="name"></input><br/>
+          <div className="mb-3">
+            <label className="form-label">Nombre</label>
+            <input type="text" className="form-control" placeholder="Ingrese su nombre" />
+          </div>
 
-            <label>Apellidos</label><br/>
-            <input type="text" className="surnames"></input><br/>
+          <div className="mb-3">
+            <label className="form-label">Apellidos</label>
+            <input type="text" className="form-control" placeholder="Ingrese sus apellidos" />
+          </div>
 
-            <label>Email</label><br/>
-            <input type="text" className="mail"></input><br/>
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input type="email" className="form-control" placeholder="Ingrese su email" />
+          </div>
 
-            <label>Contraseña</label><br/>
-            <input type="text" className="password"></input><br/>
+          <div className="mb-3">
+            <label className="form-label">Contraseña</label>
+            <input type="password" className="form-control" placeholder="Ingrese su contraseña" />
+          </div>
 
-            <label>Repite la contraseña</label><br/>
-            <input type="text" className="repeatPassword"></input><br/>
+          <div className="mb-3">
+            <label className="form-label">Repite la contraseña</label>
+            <input type="password" className="form-control" placeholder="Repita su contraseña" />
+          </div>
 
-            <button type="submit" className="submitButton">Registrarse</button>
+          <button type="submit" className="btn btn-primary w-100">
+            Registrarse
+          </button>
         </form>
-        
+      </div>
     </div>
   );
 }
