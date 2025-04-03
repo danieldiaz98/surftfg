@@ -2,8 +2,9 @@ import { useState } from "react";
 import "./styles/RegisterStyle.css"; // Importamos el archivo CSS
 import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext"
+import { Link } from "react-router-dom";
 
-function RegistroUsuario() {
+function Register() {
 
   const [email, setEmail] = useState("");
   const [password,setPassword] = useState("");
@@ -61,9 +62,12 @@ function RegistroUsuario() {
             Registrarse
           </button>
         </form>
+        <p>
+          ¿Ya estás registrado? <Link to="/Login" className="mt-10px">Inicia Sesión</Link>
+        </p>
       </div>
     </div>
   );
 }
 
-export default RegistroUsuario;
+export default Register;
