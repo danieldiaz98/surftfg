@@ -8,6 +8,7 @@ function Register() {
 
   const [email, setEmail] = useState("");
   const [password,setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
 
   const {session, signUpNewUser } = UserAuth()
   console.log(session)
@@ -15,13 +16,18 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     //setLoading(true)
-    try {
-      const result = await signUpNewUser(email, password)
-      if (result.success) {
-        alert("YekalePuto")
+    if (password == repeatPassword) {
+      try {
+        const result = await signUpNewUser(email, password)
+        if (result.success) {
+          alert("YekalePuto")
+        }
+      } catch (err) {
+        SpeechSynthesisErrorEvent("an error occurred")
       }
-    } catch (err) {
-      SpeechSynthesisErrorEvent("an error occurred")
+    }
+    else {
+      alert("Las contraseñas no coinciden")
     }
   };
 
@@ -55,7 +61,8 @@ function Register() {
 
           <div className="mb-3">
             <label className="form-label">Repite la contraseña</label>
-            <input type="password" className="form-control" placeholder="Repita su contraseña" />
+            <input type="password" className="form-control" placeholder="Repita su contraseña"
+            onChange={(e) => setRepeatPassword(e.target.value)} />
           </div>
 
           <button type="submit" className="btn btn-primary w-100">
