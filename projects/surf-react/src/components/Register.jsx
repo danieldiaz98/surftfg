@@ -3,6 +3,7 @@ import "./styles/RegisterStyle.css"; // Importamos el archivo CSS
 import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext"
 import { Link } from "react-router-dom";
+import Password from "../Password/Password";
 
 function Register() {
 
@@ -13,12 +14,13 @@ function Register() {
   const {session, signUpNewUser } = UserAuth()
   console.log(session)
 
+  const passwordValidation = new Password(password, repeatPassword);
   const handleSubmit = async (e) => {
     e.preventDefault()
     //setLoading(true)
-    if (password == repeatPassword) {
+    if (passwordValidation.isValid()) {
       try {
-        const result = await signUpNewUser(email, password)
+        const result = await signUpNewUser(email, passwordValidation.password);
         if (result.success) {
           alert("YekalePuto")
         }
@@ -27,6 +29,7 @@ function Register() {
       }
     }
     else {
+      console.error("Las contraseñas no cumplen los requisitos")
       alert("Las contraseñas no coinciden")
     }
   };
