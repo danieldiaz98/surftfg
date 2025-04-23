@@ -15,7 +15,7 @@ export const AuthContextProvider = ({children}) => {
             console.error("there was a problem signing up:", error);
             return {success: false, error};
         }
-        return { success: false, data};
+        return { success: true, data};
     };
 
     useEffect(() => {
