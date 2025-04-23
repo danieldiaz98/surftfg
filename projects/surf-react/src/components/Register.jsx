@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./styles/RegisterStyle.css"; // Importamos el archivo CSS
 import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Password from "../Password/Password";
 
 function Register() {
@@ -10,22 +10,28 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password,setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const {session, signUpNewUser } = UserAuth()
   console.log(session)
 
+  const navigate = useNavigate()
+
+
   const passwordValidation = new Password(password, repeatPassword);
   const handleSubmit = async (e) => {
     e.preventDefault()
-    //setLoading(true)
+    setLoading(true);
     if (passwordValidation.isValid()) {
       try {
         const result = await signUpNewUser(email, passwordValidation.password);
         if (result.success) {
-          alert("YekalePuto")
+          navigate("/Login")
         }
       } catch (err) {
         SpeechSynthesisErrorEvent("an error occurred")
+      } finally {
+        setLoading(false);
       }
     }
     else {
@@ -68,7 +74,7 @@ function Register() {
             onChange={(e) => setRepeatPassword(e.target.value)} />
           </div>
 
-          <button type="submit" className="btn btn-primary w-100">
+          <button type="submit" disabled={loading} className="btn btn-primary w-100">
             Registrarse
           </button>
         </form>

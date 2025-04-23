@@ -3,7 +3,7 @@ import { client } from "../supabase/client";
 const AuthContext = createContext()
 
 export const AuthContextProvider = ({children}) => {
-    const {session, setSession} = useState(undefined)
+    const [session, setSession] = useState(undefined)
 
     const signUpNewUser = async (email, password) => {
         const { data, error } = await client.auth.signUp({
@@ -17,6 +17,16 @@ export const AuthContextProvider = ({children}) => {
         }
         return { success: false, data};
     };
+
+    useEffect(() => {
+        client.auth.getSession().then(({ data: { session } }) => {
+          setSession(session);
+        });
+    
+        client.auth.onAuthStateChange((_event, session) => {
+          setSession(session);
+        });
+      }, []);
 
     const signInUser = async ({email, password}) => {
         try {
@@ -34,6 +44,8 @@ export const AuthContextProvider = ({children}) => {
             console.error("an error ocurred: ", error)
         }
     }
+
+    
 
     const signOut = () => {
         const { error } = client.auth.signOut();
