@@ -13,7 +13,7 @@ function Register() {
   const [loading, setLoading] = useState(false);
 
   const {session, signUpNewUser } = UserAuth()
-  console.log(session)
+  //console.log(session)
 
   const navigate = useNavigate()
 
