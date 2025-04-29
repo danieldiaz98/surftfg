@@ -24,4 +24,4 @@ async function getCoordinatesFromPlaceNameGoogle(placeName) {
   }
   
   // Ejemplo de llamada a la función con "Playa de Melenara"
-  getCoordinatesFromPlaceNameGoogle('La Garita, Telde, Gran Canaria, España');  
+  getCoordinatesFromPlaceNameGoogle('El Frontón, Gáldar, Gran Canaria, España');  

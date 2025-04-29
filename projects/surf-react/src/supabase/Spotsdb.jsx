@@ -1,23 +1,27 @@
-import { useEffect } from "react";
-import { client } from "../supabase/client";
+import { useEffect, useState } from "react";
+import { getAllSpots, getSpotByName } from "./spotServices";
 
-function Spotsdb() {
+function SpotList() {
+  const [spots, setSpots] = useState([]);
+
   useEffect(() => {
     async function fetchSpots() {
-      const { data, error } = await client.from('Spots').select('*');
-
-      if (error) {
-        console.error('Error al obtener los spots:', error);
-        return;
+      try {
+        const data = await getAllSpots();
+        console.log("Spots:", data);
+        setSpots(data);
+      } catch (error) {
+        console.error("Error al obtener spots:", error);
       }
-
-      console.log('Spots obtenidos:', data);
     }
 
     fetchSpots();
   }, []);
 
-  return null; // no muestra nada
+  const spot = getSpotByName("El Frontón");
+  console.log("Spot:", spot);
+
+  return null;
 }
 
-export default Spotsdb;
+export default SpotList;
