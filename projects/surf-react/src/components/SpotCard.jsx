@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useNavigate } from "react-router-dom";
 
 function SpotCard ({name, location, imageUrl}) {
     return (
@@ -12,7 +13,7 @@ function SpotCard ({name, location, imageUrl}) {
                 <li className="list-group-item">{location}</li>
             </ul>
             <div className="card-body">
-                <a href="#" className="card-link">Card link</a>
+                <Link to="/SpotPage" prop={name} className="card-link">Card link</Link>
             </div>
         </div>
     )
