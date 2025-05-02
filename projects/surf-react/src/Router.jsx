@@ -8,5 +8,5 @@ export const router = createBrowserRouter([
     { path: "/", element: <App /> },
     { path: "/Login", element: <Login />},
     { path: "/Registro", element: <Register />},
-    { path: "/SpotPage", element: <SpotPage />}
+    { path: "/:spotName", element: <SpotPage /> } 
 ])

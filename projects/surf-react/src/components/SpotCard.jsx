@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from "react-router-dom";
 
 function SpotCard ({name, location, imageUrl}) {
+    console.log(name);
     return (
         <div className="card" style={{ display: "inline-block", margin: "10px" }}>
             <img src={imageUrl} className="card-img-top" alt="beach photo" 
@@ -13,7 +14,7 @@ function SpotCard ({name, location, imageUrl}) {
                 <li className="list-group-item">{location}</li>
             </ul>
             <div className="card-body">
-                <Link to="/SpotPage" prop={name} className="card-link">Card link</Link>
+            <Link to={`/${encodeURIComponent(name)}`} className="card-link">Card link</Link>
             </div>
         </div>
     )
