@@ -14,7 +14,7 @@ function SpotCard ({name, location, imageUrl}) {
                 <li className="list-group-item">{location}</li>
             </ul>
             <div className="card-body">
-            <Link to={`/${encodeURIComponent(name)}`} className="card-link">Card link</Link>
+            <Link to={`/${encodeURIComponent(name)}`} state={{location, imageUrl}} className="card-link">Card link</Link>
             </div>
         </div>
     )
