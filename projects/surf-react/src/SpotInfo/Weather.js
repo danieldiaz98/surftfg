@@ -15,7 +15,7 @@ async function getWeatherData(lat, lng) {
       console.error('Error obteniendo datos meteorológicos:', error);
     }
   }
-  
+  export default getWeatherData;
   //Ejemplo de llamada a la función con coordenadas de "Playa de Melenara" obtenidas a través Location.js
   getWeatherData(28.1258699,-15.5847224);
   
