@@ -22,6 +22,6 @@ async function getCoordinatesFromPlaceNameGoogle(placeName) {
       console.error('Error obteniendo coordenadas de Google Maps:', error);
     }
   }
-  
+  export default getCoordinatesFromPlaceNameGoogle;
   // Ejemplo de llamada a la función con "Playa de Melenara"
   getCoordinatesFromPlaceNameGoogle('El Frontón, Gáldar, Gran Canaria, España');  
