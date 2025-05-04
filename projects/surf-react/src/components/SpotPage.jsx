@@ -2,6 +2,7 @@ import React from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getSpotByName } from "../supabase/spotServices";
+import { getCoordinatesFromPlaceNameGoogle} from "../SpotInfo/Location";
 import Navbar from "./Navbar";
 
 function SpotPage() {
@@ -9,6 +10,11 @@ function SpotPage() {
     const decodedName = decodeURIComponent(spotName);
     const [spot, setSpot] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const spotNamePlusLocationName = decodedName + ", " + spot.Location;
+    const locationCoordinates = getCoordinatesFromPlaceNameGoogle(spotNamePlusLocationName);
+    console.log(locationCoordinates);
+
 
     useEffect(() => {
         async function fetchSpot() {

@@ -21,6 +21,7 @@ async function getCoordinatesFromPlaceNameGoogle(placeName) {
     } catch (error) {
       console.error('Error obteniendo coordenadas de Google Maps:', error);
     }
+    return [lat, lng];
   }
   export default getCoordinatesFromPlaceNameGoogle;
   // Ejemplo de llamada a la función con "Playa de Melenara"
