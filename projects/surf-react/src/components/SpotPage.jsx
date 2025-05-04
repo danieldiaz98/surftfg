@@ -11,7 +11,7 @@ function SpotPage() {
             <div className="row justify-content-center">
                 <div className="col-lg-8 text-center">
                     {/* Título del spot */}
-                    <h1 className="display-4 mb-4">{decodeURIComponent(spotName)}</h1>
+                    <h1 className="display-4 mb-4">{spotName}</h1>
 
                     {/* Imagen del spot como parte del contenido */}
                     {imageUrl && (
@@ -28,7 +28,7 @@ function SpotPage() {
 
                     {/* Descripción */}
                     <p className="fs-5">
-                        Bienvenido a {decodeURIComponent(spotName)}. Este spot es conocido por su belleza única
+                        Bienvenido a {spotName}. Este spot es conocido por su belleza única
                         y su entorno especial. Aquí puedes añadir más detalles sobre actividades, historia o
                         recomendaciones para los visitantes.
                     </p>
