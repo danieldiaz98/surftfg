@@ -3,6 +3,7 @@ import { useParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getSpotByName } from "../supabase/spotServices";
 import getCoordinatesFromPlaceNameGoogle from "../SpotInfo/Location";
+import getWeatherData from "../SpotInfo/Weather";
 import Navbar from "./Navbar";
 
 function SpotPage() {
@@ -11,7 +12,7 @@ function SpotPage() {
     const [spot, setSpot] = useState(null);
     const [loading, setLoading] = useState(true);
     const [coordinates, setCoordinates] = useState(null);
-
+    const [weatherData, setWeatherData] = useState(null);
 
     useEffect(() => {
         async function fetchSpot() {
@@ -35,6 +36,21 @@ function SpotPage() {
                 });
         }
     }, [spot]);
+
+    useEffect(() => {
+        if (coordinates) {
+            getWeatherData(coordinates.lat, coordinates.lng)
+                .then((data) => {
+                    setWeatherData(data);
+                    console.log("Datos meteorológicos:", data);
+                })
+                .catch((error) => {
+                    console.error("Error obteniendo datos meteorológicos:", error);
+                });
+        }
+    }, [coordinates]);
+    
+
 
     if (loading) {
         return (
