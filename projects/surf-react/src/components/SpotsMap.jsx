@@ -4,16 +4,16 @@ import { GoogleMap, LoadScript } from "@react-google-maps/api";
 
 const containerStyle = {
   width: "100%",
-  height: "500px"
+  height: "1000px"
 };
 
 const center = {
-  lat: -34.6037,
-  lng: -58.3816
+  lat: 27.9915,
+  lng: -15.4208
 };
 
 function SpotsMap() {
-  const apiKey = 'AIzaSyBv6ANWObrc79ReQ8h2iGqW6MZbRkZkg6s';
+  const apiKey = 'AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw';
 
   return (
     <>
