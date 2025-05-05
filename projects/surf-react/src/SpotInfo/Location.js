@@ -23,3 +23,5 @@ async function getCoordinatesFromPlaceNameGoogle(placeName) {
 }
 
 export default getCoordinatesFromPlaceNameGoogle;
+
+getCoordinatesFromPlaceNameGoogle("La Ciser (Playa de las Canteras), Las Palmas de Gran Canaria, España")
