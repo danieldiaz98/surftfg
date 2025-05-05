@@ -3,10 +3,12 @@ import App from "./App"
 import Register from './components/Register'
 import Login from './components/Login'
 import SpotPage from './components/SpotPage'
+import SpotsMap from './components/SpotsMap'
 
 export const router = createBrowserRouter([
     { path: "/", element: <App /> },
     { path: "/Login", element: <Login />},
     { path: "/Registro", element: <Register />},
+    { path: "/SpotsMap", element: <SpotsMap />},
     { path: "/:spotName", element: <SpotPage /> } 
 ])
