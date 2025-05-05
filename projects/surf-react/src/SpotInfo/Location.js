@@ -1,27 +1,26 @@
 async function getCoordinatesFromPlaceNameGoogle(placeName) {
-  const apiKey = 'AIzaSyDwqQ1opp8hG88akJf2a78cYmKcQsb6D6c'; // Reemplaza con tu propia API key
+  const apiKey = 'AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw'; // Asegúrate de proteger esta clave en producción
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName)}&key=${apiKey}`;
 
   try {
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.status === 'OK') {
+    if (data.status === 'OK' && data.results.length > 0) {
       const lat = data.results[0].geometry.location.lat;
       const lng = data.results[0].geometry.location.lng;
 
-      console.log(`Coordenadas de "${placeName}": Latitud: ${lat}, Longitud: ${lng}`);
+      console.log(`Coordenadas de "${placeName}":`);
+      console.log(`Latitud: ${lat}, Longitud: ${lng}`);
 
       return { lat, lng };
     } else {
-      throw new Error('No se encontraron coordenadas para ese lugar.');
+      throw new Error(`No se encontraron coordenadas para: ${placeName}`);
     }
   } catch (error) {
     console.error('Error obteniendo coordenadas de Google Maps:', error);
     return null;
   }
 }
-
+getCoordinatesFromPlaceNameGoogle("El Frontón, Gáldar, Gran Canaria, España")
 export default getCoordinatesFromPlaceNameGoogle;
-
-getCoordinatesFromPlaceNameGoogle("La Ciser (Playa de las Canteras), Las Palmas de Gran Canaria, España")
