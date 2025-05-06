@@ -45,6 +45,7 @@ function SpotPage() {
                     console.log("Datos meteorológicos:", data);
                 })
                 .catch((error) => {
+                    
                     console.error("Error obteniendo datos meteorológicos:", error);
                 });
         }
@@ -98,28 +99,33 @@ function SpotPage() {
                             {spot.Description}
                         </p>
                         {/* Datos meteorológicos */}
-                        {weatherData && (
                         <div className="mt-5 p-4 rounded shadow bg-light text-start">
-                            <h4 className="mb-4">Condiciones meteorológicas (última hora)</h4>
-                            <div className="row">
+                        <h4 className="mb-4">Condiciones meteorológicas (última hora)</h4>
+
+                        <div className="row">
                             <div className="col-md-6 mb-3">
-                                <strong>Altura de ola:</strong> {weatherData.waveHeight?.sg ?? "N/D"} m
+                            <strong>Altura de ola:</strong>{" "}
+                            {weatherData?.waveHeight?.sg ?? "N/D"} m
                             </div>
                             <div className="col-md-6 mb-3">
-                                <strong>Periodo de ola:</strong> {weatherData.wavePeriod?.sg ?? "N/D"} s
+                            <strong>Periodo de ola:</strong>{" "}
+                            {weatherData?.wavePeriod?.sg ?? "N/D"} s
                             </div>
                             <div className="col-md-6 mb-3">
-                                <strong>Dirección de ola:</strong> {weatherData.waveDirection?.sg ?? "N/D"}°
+                            <strong>Dirección de ola:</strong>{" "}
+                            {weatherData?.waveDirection?.sg ?? "N/D"}°
                             </div>
                             <div className="col-md-6 mb-3">
-                                <strong>Velocidad del viento:</strong> {weatherData.windSpeed?.sg ?? "N/D"} m/s
+                            <strong>Velocidad del viento:</strong>{" "}
+                            {weatherData?.windSpeed?.sg ?? "N/D"} m/s
                             </div>
                             <div className="col-md-6 mb-3">
-                                <strong>Dirección del viento:</strong> {weatherData.windDirection?.sg ?? "N/D"}°
-                            </div>
+                            <strong>Dirección del viento:</strong>{" "}
+                            {weatherData?.windDirection?.sg ?? "N/D"}°
                             </div>
                         </div>
-                        )}
+                        </div>
+
                     </div>
                 </div>
             </div>
