@@ -64,7 +64,7 @@ function SpotsMap() {
               <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={center}
-                zoom={11}
+                zoom={10}
               >
                 {spots.map((spot, index) => (
                   <Marker
@@ -82,7 +82,7 @@ function SpotsMap() {
                 >
                   <div style={{ textAlign: "center", padding: "8px", maxWidth: "200px" }}>
                     <Link
-                      to={`/spots/${encodeURIComponent(selectedSpot.Name)}`}
+                      to={`/${encodeURIComponent(selectedSpot.Name)}`}
                       style={{
                         textDecoration: "none",
                         fontSize: "1.1rem",
