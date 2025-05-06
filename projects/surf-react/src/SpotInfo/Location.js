@@ -22,5 +22,5 @@ async function getCoordinatesFromPlaceNameGoogle(placeName) {
     return null;
   }
 }
-getCoordinatesFromPlaceNameGoogle("El Frontón, Gáldar, Gran Canaria, España")
+getCoordinatesFromPlaceNameGoogle("El Confital, Las Palmas de Gran Canaria, Gran Canaria, España")
 export default getCoordinatesFromPlaceNameGoogle;
