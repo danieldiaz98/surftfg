@@ -80,26 +80,28 @@ function SpotsMap() {
                   position={selectedSpot.coordinates}
                   onCloseClick={() => setSelectedSpot(null)}
                 >
-                  <div style={{ textAlign: "center", padding: "8px", maxWidth: "200px" }}>
+                  <div className="p-2 rounded shadow-sm bg-white text-center" style={{ maxWidth: "250px" }}>
+                    <h6 className="mb-2 text-primary fw-bold">
+                      {selectedSpot.Name}
+                    </h6>
+                
                     <Link
                       to={`/${encodeURIComponent(selectedSpot.Name)}`}
-                      style={{
-                        textDecoration: "none",
-                        fontSize: "1.1rem",
-                        fontWeight: "600",
-                        color: "#2c3e50",
-                        display: "inline-block",
-                        padding: "6px 10px",
-                        borderRadius: "6px",
-                        backgroundColor: "#e3f2fd",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-                      }}
+                      className="btn btn-outline-primary btn-sm d-block mb-2"
                     >
-                      {selectedSpot.Name}
+                      Ver detalles
                     </Link>
-                  </div>
-                </InfoWindow>
                 
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${selectedSpot.coordinates.lat},${selectedSpot.coordinates.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary btn-sm d-block"
+                    >
+                      Obtener indicaciones
+                    </a>
+                  </div>
+                </InfoWindow>                
                 )}
               </GoogleMap>
             </LoadScript>
