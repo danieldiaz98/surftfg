@@ -1,66 +1,61 @@
 import { useState } from "react";
-import "./styles/RegisterStyle.css"; // Importamos el archivo CSS
-import { client } from "../supabase/client";
-import { UserAuth } from "../context/AuthContext"
-import { Link, useNavigate } from "react-router-dom";
-import Password from "../Password/Password";
+import { useNavigate, Link } from "react-router-dom";
+import { UserAuth } from "../context/AuthContext";
+import "./styles/RegisterStyle.css";
 
 function Login() {
-
   const [email, setEmail] = useState("");
-  const [password,setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const {session, signInUser } = UserAuth()
-  //console.log(session)
-
-  const navigate = useNavigate()
+  const { signInUser } = UserAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const { session, error } = await signInUser(email, password);
+    setLoading(true);
 
-    if (error) {
-      setError(error);
-      setTimeout(() => {
-        setError("");
-      }, 3000);
-    } else {
-      navigate("/#");
-    }
+    try {
+      const { error } = await signInUser(email, password);
 
-    if (session) {
-      closeModal();
-      setError("");
+      if (error) {
+        setErrorMsg(error.message);
+      } else {
+        navigate("/"); // Redirige al home o dashboard
+      }
+    } catch (err) {
+      setErrorMsg("Ocurrió un error al iniciar sesión.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">
       <div className="card shadow-lg p-4" style={{ width: "400px" }}>
-        <h2 className="text-center mb-4">Registro de Usuario</h2>
+        <h2 className="text-center mb-4">Inicia Sesión</h2>
+
+        {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
 
         <form onSubmit={handleLogin}>
-
           <div className="mb-3">
             <label className="form-label">Email</label>
-            <input type="email" className="form-control" placeholder="Ingrese su email"
-            onChange={(e) => setEmail(e.target.value)} />
+            <input type="email" className="form-control" onChange={(e) => setEmail(e.target.value)} required />
           </div>
 
           <div className="mb-3">
             <label className="form-label">Contraseña</label>
-            <input type="password" className="form-control" placeholder="Ingrese su contraseña"
-            onChange={(e) => setPassword(e.target.value)}/>
+            <input type="password" className="form-control" onChange={(e) => setPassword(e.target.value)} required />
           </div>
 
           <button type="submit" disabled={loading} className="btn btn-primary w-100">
-            Inicia Sesión
+            {loading ? "Iniciando..." : "Iniciar Sesión"}
           </button>
         </form>
-        <p>
-          ¿No tienes cuenta? <Link to="/Registro" className="mt-10px">Regístrate</Link>
+
+        <p className="mt-3 text-center">
+          ¿No tienes cuenta? <Link to="/Registro">Regístrate</Link>
         </p>
       </div>
     </div>
