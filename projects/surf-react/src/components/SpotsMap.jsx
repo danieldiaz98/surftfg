@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
-import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api";
+import { GoogleMap, LoadScriptNext, Marker, InfoWindow } from "@react-google-maps/api";
 import { getAllSpots } from "../supabase/spotServices";
 import getCoordinatesFromPlaceNameGoogle from "../SpotInfo/Location";
 import { Link } from "react-router-dom";
@@ -60,7 +60,7 @@ function SpotsMap() {
           <p className="text-center">Cargando mapa...</p>
         ) : (
           <div className="d-flex justify-content-center">
-            <LoadScript googleMapsApiKey={apiKey}>
+            <LoadScriptNext googleMapsApiKey={apiKey}>
               <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={center}
@@ -104,7 +104,7 @@ function SpotsMap() {
                 </InfoWindow>                
                 )}
               </GoogleMap>
-            </LoadScript>
+            </LoadScriptNext>
           </div>
         )}
       </div>
