@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 function SpotCard ({name, location, imageUrl}) {
     console.log(name);
     return (
-        <div className="card" style={{ display: "inline-block", margin: "10px" }}>
+        <div className="card" style={{ margin: "10px" }}>
             <img src={imageUrl} className="card-img-top" alt="beach photo" 
             style={{width: "auto", height: "300px"}}/>
             <div className="card-body">
