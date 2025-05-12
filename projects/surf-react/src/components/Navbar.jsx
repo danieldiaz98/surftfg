@@ -18,7 +18,7 @@ function Navbar () {
                 <Link to="/SpotsMap" className="nav-link" href="#">Map</Link>
                 </li>
                 <li className="nav-item">
-                <Link to="/" className="nav-link" href="#">Spots</Link>
+                <Link to="/Spots" className="nav-link" href="#">Spots</Link>
                 </li>
             </ul>
             <Link to="/Login" className="mt-10px">Inicia Sesión</Link>
