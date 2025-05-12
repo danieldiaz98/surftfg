@@ -60,7 +60,7 @@ function LandingPage() {
 
       {/* Footer */}
       <footer className="bg-light py-4 text-center text-muted">
-        <p>&copy; {new Date().getFullYear()} SurfConnect. Todos los derechos reservados.</p>
+        <p>&copy; {new Date().getFullYear()} Waver. Todos los derechos reservados.</p>
       </footer>
     </div>
   );
