@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext";
 import Navbar from "./Navbar";
-import { Spinner, Button, Card, Image, Row, Col } from "react-bootstrap";
+import { Spinner, Button, Card, Image, Row, Col, Modal } from "react-bootstrap";
 
 function Profile() {
   const { session } = UserAuth();
@@ -13,6 +13,7 @@ function Profile() {
   const [galleryPhotos, setGalleryPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(null); // NUEVO
 
   const profileFileInputRef = useRef(null);
   const galleryFileInputRef = useRef(null);
@@ -72,7 +73,6 @@ function Profile() {
 
       if (uploadError) {
         console.error("Error al subir imagen:", uploadError.message);
-        setLoading(false);
         return;
       }
 
@@ -83,9 +83,7 @@ function Profile() {
         .update({ photo_url: publicUrl })
         .eq("id", session.user.id);
 
-      if (updateError) {
-        console.error("Error actualizando foto principal en perfil:", updateError.message);
-      } else {
+      if (!updateError) {
         setPerfil((prev) => ({ ...prev, photo_url: publicUrl }));
       }
     } finally {
@@ -103,20 +101,17 @@ function Profile() {
       const timestamp = Date.now();
       const fileName = `${session.user.id}-gallery-${timestamp}.${fileExt}`;
 
-      // Subir imagen a bucket
       const { error: uploadError } = await client.storage
         .from("avatars")
         .upload(fileName, file, { cacheControl: "3600", upsert: false });
 
       if (uploadError) {
         console.error("Error al subir imagen a la galería:", uploadError.message);
-        setUploadingGallery(false);
         return;
       }
 
       const { data: { publicUrl } } = client.storage.from("avatars").getPublicUrl(fileName);
 
-      // Insertar URL en la tabla profile_photos
       const { error: insertError } = await client.from("profile_photos").insert([
         {
           user_id: session.user.id,
@@ -125,9 +120,7 @@ function Profile() {
         },
       ]);
 
-      if (insertError) {
-        console.error("Error insertando foto en la galería:", insertError.message);
-      } else {
+      if (!insertError) {
         setGalleryPhotos((prev) => [{ photo_url: publicUrl }, ...prev]);
       }
     } finally {
@@ -142,7 +135,6 @@ function Profile() {
       <Navbar />
       <div className="container mt-5 d-flex flex-column align-items-center">
         <Card className="shadow-lg p-4 text-center" style={{ maxWidth: "600px", width: "100%" }}>
-          {/* Foto Principal */}
           <div className="mb-3 position-relative d-inline-block">
             <Image
               src={perfil.photo_url || "/default-avatar.png"}
@@ -171,9 +163,8 @@ function Profile() {
           <h3>{perfil.nombre} {perfil.apellidos}</h3>
           <p className="text-muted">{session.user.email}</p>
 
-          {/* Galería de Fotos */}
           <hr />
-          <div className="d-flex justify-content-between align-items-center mb-3" style={{ maxWidth: "600px", width: "100%" }}>
+          <div className="d-flex justify-content-between align-items-center mb-3 w-100">
             <h5>Galería de Fotos</h5>
             <input
               type="file"
@@ -192,15 +183,14 @@ function Profile() {
             </Button>
           </div>
 
-          {/* Muestra las fotos en filas */}
           <Row xs={2} md={3} lg={4} className="g-3">
             {galleryPhotos.length === 0 && <p className="text-muted">No hay fotos en la galería.</p>}
             {galleryPhotos.map((photo, idx) => (
               <Col key={photo.id || idx}>
-                <Card>
+                <Card onClick={() => setSelectedPhoto(photo.photo_url)} style={{ cursor: "pointer" }}>
                   <Card.Img
                     variant="top"
-                    src={photo.photo_url || "/default-avatar.png"}
+                    src={photo.photo_url}
                     style={{ height: "150px", objectFit: "cover" }}
                   />
                 </Card>
@@ -209,6 +199,28 @@ function Profile() {
           </Row>
         </Card>
       </div>
+
+      {/* Modal para ver imagen ampliada */}
+      <Modal
+        show={!!selectedPhoto}
+        onHide={() => setSelectedPhoto(null)}
+        centered
+        size="lg"
+      >
+        <Modal.Body className="p-0 text-center bg-dark">
+          <Image
+            src={selectedPhoto}
+            alt="Vista ampliada"
+            fluid
+            style={{ maxHeight: "80vh", objectFit: "contain" }}
+          />
+        </Modal.Body>
+        <Modal.Footer className="justify-content-center">
+          <Button variant="secondary" onClick={() => setSelectedPhoto(null)}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }
