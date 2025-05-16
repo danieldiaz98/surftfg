@@ -23,7 +23,7 @@ function Login() {
       if (error) {
         setErrorMsg(error.message);
       } else {
-        navigate("/"); // Redirige al home o dashboard
+        navigate("/Perfil"); // Redirige al home o dashboard
       }
     } catch (err) {
       setErrorMsg("Ocurrió un error al iniciar sesión.");
