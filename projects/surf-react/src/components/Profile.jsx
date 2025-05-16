@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext";
 import Navbar from "./Navbar";
+import { Spinner, Button, Card, Image } from "react-bootstrap";
 
-function Perfil() {
+function Profile() {
   const { session } = UserAuth();
   const navigate = useNavigate();
+
   const [perfil, setPerfil] = useState(null);
-  const [fotoPerfil, setFotoPerfil] = useState("/default-avatar.png");
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -18,98 +20,101 @@ function Perfil() {
     }
 
     const fetchPerfil = async () => {
-      const { data } = await client
+      setLoading(true);
+      const { data, error } = await client
         .from("profiles")
-        .select("nombre, apellidos")
+        .select("nombre, apellidos, photo_url")
         .eq("id", session.user.id)
         .single();
-      if (data) setPerfil(data);
-    };
 
-    const fetchFotoPerfil = async () => {
-      const { data } = await client
-        .from("profile_photos")
-        .select("photo_url")
-        .eq("user_id", session.user.id)
-        .order("uploaded_at", { ascending: false })
-        .limit(1);
-      if (data && data.length > 0) {
-        setFotoPerfil(data[0].photo_url);
+      if (error) {
+        console.error("Error fetching profile:", error);
+      } else {
+        setPerfil(data);
       }
+      setLoading(false);
     };
 
     fetchPerfil();
-    fetchFotoPerfil();
   }, [session, navigate]);
 
-  const handleUpload = async (e) => {
+  const handleUploadFotoPrincipal = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const fileName = `${session.user.id}-${Date.now()}.${file.name.split(".").pop()}`;
-    const { data, error } = await client.storage
-      .from("avatars")
-      .upload(fileName, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
+    try {
+      setLoading(true);
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${session.user.id}-profile.${fileExt}`;
 
-    if (error) {
-      console.error("Error al subir imagen:", error.message);
-      return;
-    }
+      // Sube la imagen al bucket avatars
+      const { error: uploadError } = await client.storage
+        .from("avatars")
+        .upload(fileName, file, { cacheControl: "3600", upsert: true });
 
-    const {
-      data: { publicUrl },
-    } = client.storage.from("avatars").getPublicUrl(fileName);
+      if (uploadError) {
+        console.error("Error al subir imagen:", uploadError.message);
+        setLoading(false);
+        return;
+      }
 
-    // Guarda la URL en la base de datos
-    const insertResult = await client.from("profile_photos").insert([
-      {
-        user_id: session.user.id,
-        photo_url: publicUrl,
-        uploaded_at: new Date().toISOString(),
-      },
-    ]);
+      // Obtiene la URL pública
+      const { data: { publicUrl } } = client.storage.from("avatars").getPublicUrl(fileName);
 
-    if (!insertResult.error) {
-      setFotoPerfil(publicUrl); // Actualiza visualmente
+      // Actualiza el perfil con la nueva URL
+      const { error: updateError } = await client
+        .from("profiles")
+        .update({ photo_url: publicUrl })
+        .eq("id", session.user.id);
+
+      if (updateError) {
+        console.error("Error actualizando foto principal en perfil:", updateError.message);
+      } else {
+        setPerfil((prev) => ({ ...prev, photo_url: publicUrl }));
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!perfil) return null;
+  if (!perfil) return <Spinner animation="border" className="m-5" />;
 
   return (
     <>
       <Navbar />
-      <div className="container mt-5 d-flex justify-content-center">
-        <div className="card shadow-lg p-4 text-center" style={{ maxWidth: "1000px", width: "100%" }}>
-          <img
-            src={fotoPerfil}
-            alt="Foto de perfil"
-            className="rounded-circle border border-primary border-4 mb-3 mx-auto d-block object-fit-cover"
-            style={{ width: "140px", height: "140px" }}
-          />
+      <div className="container mt-5 d-flex flex-column align-items-center">
+        <Card className="shadow-lg p-4 text-center" style={{ maxWidth: "600px", width: "100%" }}>
+          <div className="mb-3 position-relative d-inline-block">
+            <Image
+              src={perfil.photo_url || "/default-avatar.png"}
+              alt="Foto de perfil"
+              roundedCircle
+              style={{ width: "140px", height: "140px", objectFit: "cover", border: "4px solid #007bff" }}
+            />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleUploadFotoPrincipal}
+              style={{ display: "none" }}
+              accept="image/*"
+            />
+            <Button
+              variant="outline-primary"
+              size="sm"
+              className="position-absolute bottom-0 end-0"
+              onClick={() => fileInputRef.current.click()}
+              disabled={loading}
+            >
+              {loading ? "Subiendo..." : "Cambiar"}
+            </Button>
+          </div>
+
           <h3>{perfil.nombre} {perfil.apellidos}</h3>
           <p className="text-muted">{session.user.email}</p>
-
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleUpload}
-            style={{ display: "none" }}
-            accept="image/*"
-          />
-          <button
-            className="btn btn-outline-primary btn-sm mt-3"
-            onClick={() => fileInputRef.current.click()}
-          >
-            Cambiar foto de perfil
-          </button>
-        </div>
+        </Card>
       </div>
     </>
   );
 }
 
-export default Perfil;
+export default Profile;
