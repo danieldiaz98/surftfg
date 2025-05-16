@@ -83,12 +83,12 @@ function Perfil() {
     <>
       <Navbar />
       <div className="container mt-5 d-flex justify-content-center">
-        <div className="card shadow-lg p-4 text-center" style={{ maxWidth: "500px", width: "100%" }}>
+        <div className="card shadow-lg p-4 text-center" style={{ maxWidth: "1000px", width: "100%" }}>
           <img
             src={fotoPerfil}
             alt="Foto de perfil"
-            className="rounded-circle shadow mb-3"
-            style={{ width: "140px", height: "140px", objectFit: "cover", border: "4px solid #007bff" }}
+            className="rounded-circle border border-primary border-4 mb-3 mx-auto d-block object-fit-cover"
+            style={{ width: "140px", height: "140px" }}
           />
           <h3>{perfil.nombre} {perfil.apellidos}</h3>
           <p className="text-muted">{session.user.email}</p>
