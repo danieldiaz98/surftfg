@@ -8,7 +8,7 @@ function Profile() {
   const { session } = UserAuth();
   const navigate = useNavigate();
   const [perfil, setPerfil] = useState(null);
-  const [fotoPerfil, setFotoPerfil] = useState("/default-avatar.jpg"); // valor por defecto
+  const [fotoPerfil, setFotoPerfil] = useState("/default-avatar.png"); // valor por defecto
 
   useEffect(() => {
     if (!session) {
