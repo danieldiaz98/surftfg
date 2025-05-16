@@ -62,6 +62,7 @@ function Perfil() {
           </div>
 
           <hr />
+          <h3>Mis fotos</h3>
         </div>
       </div>
     </>
