@@ -4,11 +4,11 @@ import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext";
 import Navbar from "./Navbar";
 
-function Profile() {
+function Perfil() {
   const { session } = UserAuth();
   const navigate = useNavigate();
   const [perfil, setPerfil] = useState(null);
-  const [fotoPerfil, setFotoPerfil] = useState("/default-avatar.png"); // valor por defecto
+  const [fotoPerfil, setFotoPerfil] = useState("/default-avatar.png");
 
   useEffect(() => {
     if (!session) {
@@ -23,7 +23,7 @@ function Profile() {
         .eq("id", session.user.id)
         .single();
 
-      if (!error) setPerfil(data);
+      if (!error && data) setPerfil(data);
     };
 
     const fetchFotoPerfil = async () => {
@@ -48,25 +48,24 @@ function Profile() {
   return (
     <>
       <Navbar />
-      <div className="container mt-5">
-        <div className="card shadow p-4 text-center">
-          <h2 className="mb-4">Mi Perfil</h2>
+      <div className="container mt-5 d-flex justify-content-center">
+        <div className="card shadow-lg p-4" style={{ maxWidth: "2000px", width: "100%" }}>
+          <div className="text-center">
+            <img
+              src={fotoPerfil}
+              alt="Foto de perfil"
+              className="rounded-circle shadow mb-4"
+              style={{ width: "140px", height: "140px", objectFit: "cover", border: "4px solid #007bff" }}
+            />
+            <h3 className="mb-1">{perfil.nombre} {perfil.apellidos}</h3>
+            <p className="text-muted mb-3">{session.user.email}</p>
+          </div>
 
-          {/* Imagen de perfil redonda */}
-          <img
-            src={fotoPerfil}
-            alt="Foto de perfil"
-            className="rounded-circle mb-4 border"
-            style={{ width: "150px", height: "150px", objectFit: "cover" }}
-          />
-
-          <p><strong>Nombre:</strong> {perfil.nombre}</p>
-          <p><strong>Apellidos:</strong> {perfil.apellidos}</p>
-          <p><strong>Email:</strong> {session.user.email}</p>
+          <hr />
         </div>
       </div>
     </>
   );
 }
 
-export default Profile;
+export default Perfil;
