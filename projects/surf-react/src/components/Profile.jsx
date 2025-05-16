@@ -3,15 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext";
 import Navbar from "./Navbar";
-import { Spinner, Button, Card, Image } from "react-bootstrap";
+import { Spinner, Button, Card, Image, Row, Col } from "react-bootstrap";
 
 function Profile() {
   const { session } = UserAuth();
   const navigate = useNavigate();
 
   const [perfil, setPerfil] = useState(null);
+  const [galleryPhotos, setGalleryPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const fileInputRef = useRef(null);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+
+  const profileFileInputRef = useRef(null);
+  const galleryFileInputRef = useRef(null);
 
   useEffect(() => {
     if (!session) {
@@ -35,7 +39,22 @@ function Profile() {
       setLoading(false);
     };
 
+    const fetchGalleryPhotos = async () => {
+      const { data, error } = await client
+        .from("profile_photos")
+        .select("id, photo_url, uploaded_at")
+        .eq("user_id", session.user.id)
+        .order("uploaded_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching gallery photos:", error);
+      } else {
+        setGalleryPhotos(data || []);
+      }
+    };
+
     fetchPerfil();
+    fetchGalleryPhotos();
   }, [session, navigate]);
 
   const handleUploadFotoPrincipal = async (e) => {
@@ -47,7 +66,6 @@ function Profile() {
       const fileExt = file.name.split(".").pop();
       const fileName = `${session.user.id}-profile.${fileExt}`;
 
-      // Sube la imagen al bucket avatars
       const { error: uploadError } = await client.storage
         .from("avatars")
         .upload(fileName, file, { cacheControl: "3600", upsert: true });
@@ -58,10 +76,8 @@ function Profile() {
         return;
       }
 
-      // Obtiene la URL pública
       const { data: { publicUrl } } = client.storage.from("avatars").getPublicUrl(fileName);
 
-      // Actualiza el perfil con la nueva URL
       const { error: updateError } = await client
         .from("profiles")
         .update({ photo_url: publicUrl })
@@ -77,6 +93,48 @@ function Profile() {
     }
   };
 
+  const handleUploadGalleryPhoto = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploadingGallery(true);
+      const fileExt = file.name.split(".").pop();
+      const timestamp = Date.now();
+      const fileName = `${session.user.id}-gallery-${timestamp}.${fileExt}`;
+
+      // Subir imagen a bucket
+      const { error: uploadError } = await client.storage
+        .from("avatars")
+        .upload(fileName, file, { cacheControl: "3600", upsert: false });
+
+      if (uploadError) {
+        console.error("Error al subir imagen a la galería:", uploadError.message);
+        setUploadingGallery(false);
+        return;
+      }
+
+      const { data: { publicUrl } } = client.storage.from("avatars").getPublicUrl(fileName);
+
+      // Insertar URL en la tabla profile_photos
+      const { error: insertError } = await client.from("profile_photos").insert([
+        {
+          user_id: session.user.id,
+          photo_url: publicUrl,
+          uploaded_at: new Date().toISOString(),
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Error insertando foto en la galería:", insertError.message);
+      } else {
+        setGalleryPhotos((prev) => [{ photo_url: publicUrl }, ...prev]);
+      }
+    } finally {
+      setUploadingGallery(false);
+    }
+  };
+
   if (!perfil) return <Spinner animation="border" className="m-5" />;
 
   return (
@@ -84,6 +142,7 @@ function Profile() {
       <Navbar />
       <div className="container mt-5 d-flex flex-column align-items-center">
         <Card className="shadow-lg p-4 text-center" style={{ maxWidth: "600px", width: "100%" }}>
+          {/* Foto Principal */}
           <div className="mb-3 position-relative d-inline-block">
             <Image
               src={perfil.photo_url || "/default-avatar.png"}
@@ -93,7 +152,7 @@ function Profile() {
             />
             <input
               type="file"
-              ref={fileInputRef}
+              ref={profileFileInputRef}
               onChange={handleUploadFotoPrincipal}
               style={{ display: "none" }}
               accept="image/*"
@@ -102,7 +161,7 @@ function Profile() {
               variant="outline-primary"
               size="sm"
               className="position-absolute bottom-0 end-0"
-              onClick={() => fileInputRef.current.click()}
+              onClick={() => profileFileInputRef.current.click()}
               disabled={loading}
             >
               {loading ? "Subiendo..." : "Cambiar"}
@@ -111,6 +170,43 @@ function Profile() {
 
           <h3>{perfil.nombre} {perfil.apellidos}</h3>
           <p className="text-muted">{session.user.email}</p>
+
+          {/* Galería de Fotos */}
+          <hr />
+          <div className="d-flex justify-content-between align-items-center mb-3" style={{ maxWidth: "600px", width: "100%" }}>
+            <h5>Galería de Fotos</h5>
+            <input
+              type="file"
+              ref={galleryFileInputRef}
+              onChange={handleUploadGalleryPhoto}
+              style={{ display: "none" }}
+              accept="image/*"
+            />
+            <Button
+              variant="outline-success"
+              size="sm"
+              onClick={() => galleryFileInputRef.current.click()}
+              disabled={uploadingGallery}
+            >
+              {uploadingGallery ? "Subiendo..." : "Añadir Foto"}
+            </Button>
+          </div>
+
+          {/* Muestra las fotos en filas */}
+          <Row xs={2} md={3} lg={4} className="g-3">
+            {galleryPhotos.length === 0 && <p className="text-muted">No hay fotos en la galería.</p>}
+            {galleryPhotos.map((photo, idx) => (
+              <Col key={photo.id || idx}>
+                <Card>
+                  <Card.Img
+                    variant="top"
+                    src={photo.photo_url || "/default-avatar.png"}
+                    style={{ height: "150px", objectFit: "cover" }}
+                  />
+                </Card>
+              </Col>
+            ))}
+          </Row>
         </Card>
       </div>
     </>
