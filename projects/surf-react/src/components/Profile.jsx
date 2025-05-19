@@ -166,6 +166,7 @@ function Profile() {
           loading={loading}
           fileInputRef={profileFileInputRef}
           onUpload={(e) => handleUploadFotoPrincipal(e.target.files[0])}
+          email={session?.user?.email}
         />
         <PhotoUploader
           uploading={uploadingGallery}

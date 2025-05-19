@@ -1,6 +1,6 @@
 import { Card, Image, Button } from "react-bootstrap";
 
-function ProfileHeader({ perfil, loading, fileInputRef, onUpload }) {
+function ProfileHeader({ perfil, loading, fileInputRef, onUpload, email }) {
   return (
     <Card className="shadow-lg p-4 text-center mb-4" style={{ maxWidth: "600px", width: "100%" }}>
       <div className="mb-3 position-relative d-inline-block">
@@ -29,7 +29,7 @@ function ProfileHeader({ perfil, loading, fileInputRef, onUpload }) {
       </div>
 
       <h3>{perfil.nombre} {perfil.apellidos}</h3>
-      <p className="text-muted">{perfil.email}</p>
+      <p className="text-muted">{email}</p>
     </Card>
   );
 }
