@@ -20,7 +20,7 @@ function Gallery({ photos, selectedPhoto, setSelectedPhoto, onDelete }) {
                   variant="danger"
                   size="sm"
                   className="position-absolute top-0 end-0 m-1"
-                  onClick={() => onDelete(photo.id)}
+                  onClick={() => onDelete(photo.id, photo.photo_url)}
                 >
                   &times;
                 </Button>

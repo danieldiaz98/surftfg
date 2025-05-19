@@ -120,7 +120,19 @@ function Profile() {
     }
   };
 
-  const handleDeletePhoto = async (photoId) => {
+  const handleDeletePhoto = async (photoId, photoUrl) => {
+    
+    const urlParts = photoUrl.split("/");
+    const fileName = urlParts[urlParts.length - 1];
+
+    const { error: deleteError } = await client.storage
+      .from("avatars")
+      .remove([fileName]);
+    if (deleteError) {
+      console.error("Error eliminando del storage", deleteError.message);
+      return;
+    }
+    
     const { error } = await client
       .from("profile_photos")
       .delete()
