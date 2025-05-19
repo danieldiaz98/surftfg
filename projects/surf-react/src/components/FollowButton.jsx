@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { UserAuth } from "../context/AuthContext";
-import { followUser, unfollowUser, isFollowing } from "../services/followService";
+import { followUser, unfollowUser, isFollowing } from "../supabase/followService";
 
 function FollowButton({ profileUserId }) {
   const { session } = UserAuth();
