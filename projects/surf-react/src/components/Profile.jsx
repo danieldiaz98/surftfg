@@ -121,28 +121,37 @@ function Profile() {
   };
 
   const handleDeletePhoto = async (photoId, photoUrl) => {
-    
-    const urlParts = photoUrl.split("/");
-    const fileName = urlParts[urlParts.length - 1];
+    try {
+      // Extraer el nombre del archivo del URL de manera segura
+      const fileName = new URL(photoUrl).pathname.split("/").pop();
 
-    const { error: deleteError } = await client.storage
-      .from("avatars")
-      .remove([fileName]);
-    if (deleteError) {
-      console.error("Error eliminando del storage", deleteError.message);
-      return;
-    }
-    
-    const { error } = await client
-      .from("profile_photos")
-      .delete()
-      .eq("id", photoId)
-      .eq("user_id", session.user.id);
+      // Eliminar del storage
+      const { error: deleteStorageError } = await client.storage
+        .from("avatars")
+        .remove([fileName]);
 
-    if (!error) {
+      if (deleteStorageError) {
+        console.error("Error eliminando del storage:", deleteStorageError.message);
+        return;
+      }
+
+      // Eliminar de la base de datos
+      const { error: deleteDbError } = await client
+        .from("profile_photos")
+        .delete()
+        .eq("id", photoId)
+        .eq("user_id", session.user.id);
+
+      if (deleteDbError) {
+        console.error("Error eliminando de la base de datos:", deleteDbError.message);
+        return;
+      }
+
+      // Actualizar estado local
       setGalleryPhotos((prev) => prev.filter((p) => p.id !== photoId));
-    } else {
-      console.error(error.message);
+
+    } catch (err) {
+      console.error("Error eliminando la foto:", err);
     }
   };
 

@@ -5,7 +5,9 @@ function Gallery({ photos, selectedPhoto, setSelectedPhoto, onDelete }) {
     <>
       <div style={{ maxWidth: "600px", width: "100%" }}>
         <h5>Galería de Fotos</h5>
-        {photos.length === 0 && <p className="text-muted">No hay fotos en la galería.</p>}
+        {photos.length === 0 && (
+          <p className="text-muted">No hay fotos en la galería.</p>
+        )}
         <Row xs={2} md={3} className="g-3">
           {photos.map((photo) => (
             <Col key={photo.id}>
@@ -13,6 +15,7 @@ function Gallery({ photos, selectedPhoto, setSelectedPhoto, onDelete }) {
                 <Card.Img
                   variant="top"
                   src={photo.photo_url}
+                  alt={`Foto subida el ${new Date(photo.uploaded_at).toLocaleDateString()}`}
                   style={{ height: "150px", objectFit: "cover", cursor: "pointer" }}
                   onClick={() => setSelectedPhoto(photo.photo_url)}
                 />
@@ -21,6 +24,7 @@ function Gallery({ photos, selectedPhoto, setSelectedPhoto, onDelete }) {
                   size="sm"
                   className="position-absolute top-0 end-0 m-1"
                   onClick={() => onDelete(photo.id, photo.photo_url)}
+                  aria-label="Eliminar foto"
                 >
                   &times;
                 </Button>
@@ -39,7 +43,7 @@ function Gallery({ photos, selectedPhoto, setSelectedPhoto, onDelete }) {
         <Modal.Body className="p-0 text-center bg-dark">
           <Image
             src={selectedPhoto}
-            alt="Vista ampliada"
+            alt="Foto ampliada"
             fluid
             style={{ maxHeight: "80vh", objectFit: "contain" }}
           />
