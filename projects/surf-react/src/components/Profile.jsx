@@ -3,15 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext";
 import Navbar from "./Navbar";
-import {
-  Spinner,
-  Button,
-  Card,
-  Image,
-  Row,
-  Col,
-  Modal,
-} from "react-bootstrap";
+import ProfileHeader from "./ProfileHeader";
+import Gallery from "./Gallery";
+import PhotoUploader from "./PhotoUploader";
+import { Spinner } from "react-bootstrap";
 
 function Profile() {
   const { session } = UserAuth();
@@ -40,11 +35,9 @@ function Profile() {
         .eq("id", session.user.id)
         .single();
 
-      if (error) {
-        console.error("Error fetching profile:", error);
-      } else {
-        setPerfil(data);
-      }
+      if (error) console.error(error);
+      else setPerfil(data);
+
       setLoading(false);
     };
 
@@ -55,21 +48,15 @@ function Profile() {
         .eq("user_id", session.user.id)
         .order("uploaded_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching gallery photos:", error);
-      } else {
-        setGalleryPhotos(data || []);
-      }
+      if (error) console.error(error);
+      else setGalleryPhotos(data || []);
     };
 
     fetchPerfil();
     fetchGalleryPhotos();
   }, [session, navigate]);
 
-  const handleUploadFotoPrincipal = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
+  const handleUploadFotoPrincipal = async (file) => {
     try {
       setLoading(true);
       const fileExt = file.name.split(".").pop();
@@ -80,7 +67,7 @@ function Profile() {
         .upload(fileName, file, { cacheControl: "3600", upsert: true });
 
       if (uploadError) {
-        console.error("Error al subir imagen:", uploadError.message);
+        console.error(uploadError.message);
         return;
       }
 
@@ -99,10 +86,7 @@ function Profile() {
     }
   };
 
-  const handleUploadGalleryPhoto = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
+  const handleUploadGalleryPhoto = async (file) => {
     try {
       setUploadingGallery(true);
       const fileExt = file.name.split(".").pop();
@@ -114,7 +98,7 @@ function Profile() {
         .upload(fileName, file, { cacheControl: "3600", upsert: false });
 
       if (uploadError) {
-        console.error("Error al subir imagen a la galería:", uploadError.message);
+        console.error(uploadError.message);
         return;
       }
 
@@ -136,24 +120,17 @@ function Profile() {
     }
   };
 
-  const handleDeletePhoto = async (photoId, photoUrl) => {
-    if (!window.confirm("¿Estás seguro de que deseas eliminar esta foto?")) return;
+  const handleDeletePhoto = async (photoId) => {
+    const { error } = await client
+      .from("profile_photos")
+      .delete()
+      .eq("id", photoId)
+      .eq("user_id", session.user.id);
 
-    try {
-      const { error: deleteError } = await client
-        .from("profile_photos")
-        .delete()
-        .eq("id", photoId)
-        .eq("user_id", session.user.id);
-
-      if (deleteError) {
-        console.error("Error al eliminar la foto:", deleteError.message);
-        return;
-      }
-
+    if (!error) {
       setGalleryPhotos((prev) => prev.filter((p) => p.id !== photoId));
-    } catch (err) {
-      console.error("Error inesperado al eliminar la foto:", err);
+    } else {
+      console.error(error.message);
     }
   };
 
@@ -163,102 +140,24 @@ function Profile() {
     <>
       <Navbar />
       <div className="container mt-5 d-flex flex-column align-items-center">
-        <Card className="shadow-lg p-4 text-center" style={{ maxWidth: "600px", width: "100%" }}>
-          <div className="mb-3 position-relative d-inline-block">
-            <Image
-              src={perfil.photo_url || "/default-avatar.png"}
-              alt="Foto de perfil"
-              roundedCircle
-              style={{ width: "140px", height: "140px", objectFit: "cover", border: "4px solid #007bff" }}
-            />
-            <input
-              type="file"
-              ref={profileFileInputRef}
-              onChange={handleUploadFotoPrincipal}
-              style={{ display: "none" }}
-              accept="image/*"
-            />
-            <Button
-              variant="outline-primary"
-              size="sm"
-              className="position-absolute bottom-0 end-0"
-              onClick={() => profileFileInputRef.current.click()}
-              disabled={loading}
-            >
-              {loading ? "Subiendo..." : "Cambiar"}
-            </Button>
-          </div>
-
-          <h3>{perfil.nombre} {perfil.apellidos}</h3>
-          <p className="text-muted">{session.user.email}</p>
-
-          <hr />
-          <div className="d-flex justify-content-between align-items-center mb-3 w-100">
-            <h5>Galería de Fotos</h5>
-            <input
-              type="file"
-              ref={galleryFileInputRef}
-              onChange={handleUploadGalleryPhoto}
-              style={{ display: "none" }}
-              accept="image/*"
-            />
-            <Button
-              variant="outline-success"
-              size="sm"
-              onClick={() => galleryFileInputRef.current.click()}
-              disabled={uploadingGallery}
-            >
-              {uploadingGallery ? "Subiendo..." : "Añadir Foto"}
-            </Button>
-          </div>
-
-          <Row xs={2} md={3} lg={4} className="g-3">
-            {galleryPhotos.length === 0 && <p className="text-muted">No hay fotos en la galería.</p>}
-            {galleryPhotos.map((photo) => (
-              <Col key={photo.id}>
-                <Card className="position-relative h-100">
-                  <Card.Img
-                    variant="top"
-                    src={photo.photo_url}
-                    style={{ height: "150px", objectFit: "cover", cursor: "pointer" }}
-                    onClick={() => setSelectedPhoto(photo.photo_url)}
-                  />
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    className="position-absolute top-0 end-0 m-1"
-                    onClick={() => handleDeletePhoto(photo.id, photo.photo_url)}
-                  >
-                    &times;
-                  </Button>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Card>
+        <ProfileHeader
+          perfil={perfil}
+          loading={loading}
+          fileInputRef={profileFileInputRef}
+          onUpload={(e) => handleUploadFotoPrincipal(e.target.files[0])}
+        />
+        <PhotoUploader
+          uploading={uploadingGallery}
+          fileInputRef={galleryFileInputRef}
+          onUpload={(e) => handleUploadGalleryPhoto(e.target.files[0])}
+        />
+        <Gallery
+          photos={galleryPhotos}
+          selectedPhoto={selectedPhoto}
+          setSelectedPhoto={setSelectedPhoto}
+          onDelete={handleDeletePhoto}
+        />
       </div>
-
-      {/* Modal para ver imagen ampliada */}
-      <Modal
-        show={!!selectedPhoto}
-        onHide={() => setSelectedPhoto(null)}
-        centered
-        size="lg"
-      >
-        <Modal.Body className="p-0 text-center bg-dark">
-          <Image
-            src={selectedPhoto}
-            alt="Vista ampliada"
-            fluid
-            style={{ maxHeight: "80vh", objectFit: "contain" }}
-          />
-        </Modal.Body>
-        <Modal.Footer className="justify-content-center">
-          <Button variant="secondary" onClick={() => setSelectedPhoto(null)}>
-            Cerrar
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </>
   );
 }
