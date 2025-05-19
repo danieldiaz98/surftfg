@@ -31,7 +31,7 @@ function Profile() {
       setLoading(true);
       const { data, error } = await client
         .from("profiles")
-        .select("nombre, apellidos, photo_url")
+        .select("nombre, apellidos, photo_url, description")
         .eq("id", session.user.id)
         .single();
 

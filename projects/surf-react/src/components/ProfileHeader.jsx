@@ -30,6 +30,7 @@ function ProfileHeader({ perfil, loading, fileInputRef, onUpload, email }) {
 
       <h3>{perfil.nombre} {perfil.apellidos}</h3>
       <p className="text-muted">{email}</p>
+      <p>{perfil.description}</p>
     </Card>
   );
 }
