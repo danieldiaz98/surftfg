@@ -6,7 +6,7 @@ import Navbar from "./Navbar";
 import ProfileHeader from "./ProfileHeader";
 import Gallery from "./Gallery";
 import PhotoUploader from "./PhotoUploader";
-import { Spinner } from "react-bootstrap";
+import { Spinner, Card, Button } from "react-bootstrap";
 
 function Profile() {
   const { session } = UserAuth();
@@ -122,10 +122,8 @@ function Profile() {
 
   const handleDeletePhoto = async (photoId, photoUrl) => {
     try {
-      // Extraer el nombre del archivo del URL de manera segura
       const fileName = new URL(photoUrl).pathname.split("/").pop();
 
-      // Eliminar del storage
       const { error: deleteStorageError } = await client.storage
         .from("avatars")
         .remove([fileName]);
@@ -135,7 +133,6 @@ function Profile() {
         return;
       }
 
-      // Eliminar de la base de datos
       const { error: deleteDbError } = await client
         .from("profile_photos")
         .delete()
@@ -147,9 +144,7 @@ function Profile() {
         return;
       }
 
-      // Actualizar estado local
       setGalleryPhotos((prev) => prev.filter((p) => p.id !== photoId));
-
     } catch (err) {
       console.error("Error eliminando la foto:", err);
     }
@@ -160,25 +155,32 @@ function Profile() {
   return (
     <>
       <Navbar />
-      <div className="container mt-5 d-flex flex-column align-items-center">
-        <ProfileHeader
-          perfil={perfil}
-          loading={loading}
-          fileInputRef={profileFileInputRef}
-          onUpload={(e) => handleUploadFotoPrincipal(e.target.files[0])}
-          email={session?.user?.email}
-        />
-        <PhotoUploader
-          uploading={uploadingGallery}
-          fileInputRef={galleryFileInputRef}
-          onUpload={(e) => handleUploadGalleryPhoto(e.target.files[0])}
-        />
-        <Gallery
-          photos={galleryPhotos}
-          selectedPhoto={selectedPhoto}
-          setSelectedPhoto={setSelectedPhoto}
-          onDelete={handleDeletePhoto}
-        />
+      <div className="container mt-5 d-flex justify-content-center">
+        <Card style={{ maxWidth: "700px", width: "100%" }} className="shadow-lg p-4">
+          <ProfileHeader
+            perfil={perfil}
+            loading={loading}
+            fileInputRef={profileFileInputRef}
+            onUpload={(e) => handleUploadFotoPrincipal(e.target.files[0])}
+            email={session?.user?.email}
+          />
+
+          <div className="d-flex justify-content-between align-items-center my-2">
+            <h5 className="mb-0 text-nowrap">Galería de fotos</h5>
+            <PhotoUploader
+              uploading={uploadingGallery}
+              fileInputRef={galleryFileInputRef}
+              onUpload={(e) => handleUploadGalleryPhoto(e.target.files[0])}
+            />
+          </div>
+
+          <Gallery
+            photos={galleryPhotos}
+            selectedPhoto={selectedPhoto}
+            setSelectedPhoto={setSelectedPhoto}
+            onDelete={handleDeletePhoto}
+          />
+        </Card>
       </div>
     </>
   );

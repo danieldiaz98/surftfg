@@ -4,7 +4,6 @@ function Gallery({ photos, selectedPhoto, setSelectedPhoto, onDelete }) {
   return (
     <>
       <div style={{ maxWidth: "600px", width: "100%" }}>
-        <h5>Galería de Fotos</h5>
         {photos.length === 0 && (
           <p className="text-muted">No hay fotos en la galería.</p>
         )}
