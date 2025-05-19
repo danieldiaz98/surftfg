@@ -3,7 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext";
 import Navbar from "./Navbar";
-import { Spinner, Button, Card, Image, Row, Col, Modal } from "react-bootstrap";
+import {
+  Spinner,
+  Button,
+  Card,
+  Image,
+  Row,
+  Col,
+  Modal,
+} from "react-bootstrap";
 
 function Profile() {
   const { session } = UserAuth();
@@ -13,7 +21,7 @@ function Profile() {
   const [galleryPhotos, setGalleryPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState(null); // NUEVO
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   const profileFileInputRef = useRef(null);
   const galleryFileInputRef = useRef(null);
@@ -112,19 +120,40 @@ function Profile() {
 
       const { data: { publicUrl } } = client.storage.from("avatars").getPublicUrl(fileName);
 
-      const { error: insertError } = await client.from("profile_photos").insert([
+      const { data, error: insertError } = await client.from("profile_photos").insert([
         {
           user_id: session.user.id,
           photo_url: publicUrl,
           uploaded_at: new Date().toISOString(),
         },
-      ]);
+      ]).select();
 
-      if (!insertError) {
-        setGalleryPhotos((prev) => [{ photo_url: publicUrl }, ...prev]);
+      if (!insertError && data?.[0]) {
+        setGalleryPhotos((prev) => [data[0], ...prev]);
       }
     } finally {
       setUploadingGallery(false);
+    }
+  };
+
+  const handleDeletePhoto = async (photoId, photoUrl) => {
+    if (!window.confirm("¿Estás seguro de que deseas eliminar esta foto?")) return;
+
+    try {
+      const { error: deleteError } = await client
+        .from("profile_photos")
+        .delete()
+        .eq("id", photoId)
+        .eq("user_id", session.user.id);
+
+      if (deleteError) {
+        console.error("Error al eliminar la foto:", deleteError.message);
+        return;
+      }
+
+      setGalleryPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    } catch (err) {
+      console.error("Error inesperado al eliminar la foto:", err);
     }
   };
 
@@ -185,14 +214,23 @@ function Profile() {
 
           <Row xs={2} md={3} lg={4} className="g-3">
             {galleryPhotos.length === 0 && <p className="text-muted">No hay fotos en la galería.</p>}
-            {galleryPhotos.map((photo, idx) => (
-              <Col key={photo.id || idx}>
-                <Card onClick={() => setSelectedPhoto(photo.photo_url)} style={{ cursor: "pointer" }}>
+            {galleryPhotos.map((photo) => (
+              <Col key={photo.id}>
+                <Card className="position-relative h-100">
                   <Card.Img
                     variant="top"
                     src={photo.photo_url}
-                    style={{ height: "150px", objectFit: "cover" }}
+                    style={{ height: "150px", objectFit: "cover", cursor: "pointer" }}
+                    onClick={() => setSelectedPhoto(photo.photo_url)}
                   />
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    className="position-absolute top-0 end-0 m-1"
+                    onClick={() => handleDeletePhoto(photo.id, photo.photo_url)}
+                  >
+                    &times;
+                  </Button>
                 </Card>
               </Col>
             ))}
