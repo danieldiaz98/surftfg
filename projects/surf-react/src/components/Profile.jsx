@@ -18,6 +18,9 @@ function Profile() {
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+
   const profileFileInputRef = useRef(null);
   const galleryFileInputRef = useRef(null);
 
@@ -52,8 +55,24 @@ function Profile() {
       else setGalleryPhotos(data || []);
     };
 
+    const fetchFollowStats = async () => {
+      const { count: followers, error: followersError } = await client
+        .from("follows")
+        .select("*", { count: "exact", head: true })
+        .eq("followed_id", session.user.id);
+
+      const { count: following, error: followingError } = await client
+        .from("follows")
+        .select("*", { count: "exact", head: true })
+        .eq("follower_id", session.user.id);
+
+      if (!followersError) setFollowersCount(followers || 0);
+      if (!followingError) setFollowingCount(following || 0);
+    }
+
     fetchPerfil();
     fetchGalleryPhotos();
+    fetchFollowStats();
   }, [session, navigate]);
 
   const handleUploadFotoPrincipal = async (file) => {
