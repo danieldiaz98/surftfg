@@ -189,6 +189,7 @@ function Profile() {
           <FollowStats
             followersCount={followersCount}
             followingCount={followingCount}
+            userId={session.user.id}
           />
 
 
