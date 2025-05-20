@@ -19,7 +19,7 @@ function UserExplorer() {
         const { data: allUsers, error: userError } = await client
           .from("profiles")
           .select("id, nombre, apellidos, photo_url")
-          .neq("id", session.user.id); // todos menos yo
+          .neq("id", session.user.id);
 
         if (userError) throw userError;
 

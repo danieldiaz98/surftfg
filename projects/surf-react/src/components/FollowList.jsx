@@ -1,79 +1,81 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { client } from "../supabase/client";
-import { Card, Spinner, ListGroup, Image, Button } from "react-bootstrap";
+import { Spinner, ListGroup, Container } from "react-bootstrap";
 import Navbar from "./Navbar";
+
 function FollowList() {
-  const { id, type } = useParams();
-  const [loading, setLoading] = useState(true);
+  const { id } = useParams();
+  const location = useLocation();
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const isFollowers = location.pathname.includes("seguidores");
 
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
-
       let query;
-      if (type === "followers") {
+
+      if (isFollowers) {
+        // Mostrar los que siguen al usuario con ID :id
         query = client
           .from("follows")
-          .select("follower_id: follower(id, nombre, apellidos, photo_url)")
+          .select("follower_id(id, nombre, apellidos, photo_url)")
           .eq("followed_id", id);
       } else {
+        // Mostrar a los que sigue el usuario con ID :id
         query = client
           .from("follows")
-          .select("followed_id: followed(id, nombre, apellidos, photo_url)")
+          .select("followed_id(id, nombre, apellidos, photo_url)")
           .eq("follower_id", id);
       }
 
       const { data, error } = await query;
 
       if (error) {
-        console.error(error);
+        console.error("Error al obtener la lista:", error.message);
         setUsers([]);
       } else {
-        const extracted = data.map((item) =>
-          type === "followers" ? item.follower_id : item.followed_id
+        // Extraer solo los datos del perfil relacionados
+        const mappedUsers = data.map((item) =>
+          isFollowers ? item.follower_id : item.followed_id
         );
-        setUsers(extracted);
+        setUsers(mappedUsers);
       }
 
       setLoading(false);
     };
 
     fetchUsers();
-  }, [id, type]);
+  }, [id, isFollowers]);
+
+  if (loading) return <Spinner animation="border" className="m-5" />;
 
   return (
     <>
         <Navbar />
-        <div className="container mt-5">
-        <Card className="p-4 shadow-sm">
-            <h4 className="mb-4">{type === "followers" ? "Seguidores" : "Siguiendo"}</h4>
-            {loading ? (
-            <Spinner animation="border" />
-            ) : users.length === 0 ? (
-            <p>No hay usuarios para mostrar.</p>
+        <Container className="mt-4">
+        <h3 className="mb-4">{isFollowers ? "Seguidores" : "Siguiendo"}</h3>
+        <ListGroup>
+            {users.length === 0 ? (
+            <div>No hay usuarios para mostrar.</div>
             ) : (
-            <ListGroup variant="flush">
-                {users.map((user) => (
-                <ListGroup.Item key={user.id} className="d-flex align-items-center">
-                    <Image
+            users.map((user) => (
+                <ListGroup.Item key={user.id}>
+                <img
                     src={user.photo_url || "/default-avatar.png"}
-                    roundedCircle
-                    width={48}
-                    height={48}
-                    className="me-3"
-                    style={{ objectFit: "cover" }}
-                    />
-                    <div>
-                    <strong>{user.nombre} {user.apellidos}</strong>
-                    </div>
+                    alt="avatar"
+                    width="40"
+                    height="40"
+                    className="rounded-circle me-2"
+                />
+                {user.nombre} {user.apellidos}
                 </ListGroup.Item>
-                ))}
-            </ListGroup>
+            ))
             )}
-        </Card>
-        </div>
+        </ListGroup>
+        </Container>
     </>
   );
 }

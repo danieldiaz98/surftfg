@@ -6,7 +6,6 @@ function ProfileHeader({ perfil, loading, fileInputRef, onUpload, email, profile
 
   return (
     <div className="mb-4">
-      {/* Imagen + botón (alineados a la izquierda) */}
       <div className="d-flex align-items-center gap-3 mb-3">
         <Image
           src={perfil.photo_url || "/default-avatar.png"}
@@ -39,7 +38,6 @@ function ProfileHeader({ perfil, loading, fileInputRef, onUpload, email, profile
         )}
       </div>
 
-      {/* Nombre + botón de seguir */}
       <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
         <h3 className="mb-0">
           {perfil.nombre} {perfil.apellidos}
