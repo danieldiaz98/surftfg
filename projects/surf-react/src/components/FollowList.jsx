@@ -18,13 +18,11 @@ function FollowList() {
       let query;
 
       if (isFollowers) {
-        // Mostrar los que siguen al usuario con ID :id
         query = client
           .from("follows")
           .select("follower_id(id, nombre, apellidos, photo_url)")
           .eq("followed_id", id);
       } else {
-        // Mostrar a los que sigue el usuario con ID :id
         query = client
           .from("follows")
           .select("followed_id(id, nombre, apellidos, photo_url)")
@@ -37,7 +35,6 @@ function FollowList() {
         console.error("Error al obtener la lista:", error.message);
         setUsers([]);
       } else {
-        // Extraer solo los datos del perfil relacionados
         const mappedUsers = data.map((item) =>
           isFollowers ? item.follower_id : item.followed_id
         );
