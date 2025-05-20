@@ -6,6 +6,8 @@ import Navbar from "./Navbar";
 import ProfileHeader from "./ProfileHeader";
 import Gallery from "./Gallery";
 import PhotoUploader from "./PhotoUploader";
+import FollowStats from "./FollowStats";
+
 import { Spinner, Card, Button } from "react-bootstrap";
 
 function Profile() {
@@ -183,6 +185,12 @@ function Profile() {
             onUpload={(e) => handleUploadFotoPrincipal(e.target.files[0])}
             email={session?.user?.email}
           />
+
+          <FollowStats
+            followersCount={followersCount}
+            followingCount={followingCount}
+          />
+
 
           <div className="d-flex justify-content-between align-items-center my-2">
             <h5 className="mb-0 text-nowrap">Galería de fotos</h5>
