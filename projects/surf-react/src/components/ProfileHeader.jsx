@@ -8,7 +8,7 @@ function ProfileHeader({ perfil, loading, fileInputRef, onUpload, email, profile
     <div className="mb-4">
       <div className="d-flex align-items-center gap-3 mb-3">
         <Image
-          src={perfil.photo_url || "/default-avatar.png"}
+          src={perfil.photo_url ? perfil.photo_url : "/default-avatar.png"}
           alt="Foto de perfil"
           roundedCircle
           style={{
