@@ -4,13 +4,13 @@ import { UserAuth } from "../context/AuthContext";  // Ajusta el path si hace fa
 import { useState } from "react";
 
 function Navbar() {
-  const { session, logout } = UserAuth();
+  const { session, signOut } = UserAuth();
   const navigate = useNavigate();
 
   const [expanded, setExpanded] = useState(false);
 
   const handleLogout = async () => {
-    await logout();
+    await signOut();
     navigate("/Login");
     setExpanded(false);
   };
