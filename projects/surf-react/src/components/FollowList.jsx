@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { client } from "../supabase/client";
 import { Card, Spinner, ListGroup, Image, Button } from "react-bootstrap";
-
+import Navbar from "./Navbar";
 function FollowList() {
   const { id, type } = useParams();
   const [loading, setLoading] = useState(true);
@@ -44,34 +44,37 @@ function FollowList() {
   }, [id, type]);
 
   return (
-    <div className="container mt-5">
-      <Card className="p-4 shadow-sm">
-        <h4 className="mb-4">{type === "followers" ? "Seguidores" : "Siguiendo"}</h4>
-        {loading ? (
-          <Spinner animation="border" />
-        ) : users.length === 0 ? (
-          <p>No hay usuarios para mostrar.</p>
-        ) : (
-          <ListGroup variant="flush">
-            {users.map((user) => (
-              <ListGroup.Item key={user.id} className="d-flex align-items-center">
-                <Image
-                  src={user.photo_url || "/default-avatar.png"}
-                  roundedCircle
-                  width={48}
-                  height={48}
-                  className="me-3"
-                  style={{ objectFit: "cover" }}
-                />
-                <div>
-                  <strong>{user.nombre} {user.apellidos}</strong>
-                </div>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        )}
-      </Card>
-    </div>
+    <>
+        <Navbar />
+        <div className="container mt-5">
+        <Card className="p-4 shadow-sm">
+            <h4 className="mb-4">{type === "followers" ? "Seguidores" : "Siguiendo"}</h4>
+            {loading ? (
+            <Spinner animation="border" />
+            ) : users.length === 0 ? (
+            <p>No hay usuarios para mostrar.</p>
+            ) : (
+            <ListGroup variant="flush">
+                {users.map((user) => (
+                <ListGroup.Item key={user.id} className="d-flex align-items-center">
+                    <Image
+                    src={user.photo_url || "/default-avatar.png"}
+                    roundedCircle
+                    width={48}
+                    height={48}
+                    className="me-3"
+                    style={{ objectFit: "cover" }}
+                    />
+                    <div>
+                    <strong>{user.nombre} {user.apellidos}</strong>
+                    </div>
+                </ListGroup.Item>
+                ))}
+            </ListGroup>
+            )}
+        </Card>
+        </div>
+    </>
   );
 }
 

@@ -3,6 +3,7 @@ import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext";
 import { Spinner, Card, ListGroup, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import Navbar from "./Navbar";
 
 function UserExplorer() {
   const { session } = UserAuth();
@@ -71,40 +72,43 @@ function UserExplorer() {
   };
 
   return (
-    <div className="container mt-5">
-      <Card className="shadow p-4">
-        <h4 className="mb-4">Explorar usuarios</h4>
+    <>
+        <Navbar />
+        <div className="container mt-5">
+        <Card className="shadow p-4">
+            <h4 className="mb-4">Explorar usuarios</h4>
 
-        {loading ? (
-          <Spinner animation="border" />
-        ) : (
-          <ListGroup>
-            {users.map((user) => (
-              <ListGroup.Item key={user.id} className="d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center">
-                  <img
-                    src={user.photo_url || "/default-avatar.png"}
-                    alt="avatar"
-                    className="rounded-circle me-3"
-                    style={{ width: "40px", height: "40px", objectFit: "cover" }}
-                  />
-                  <Link to={`/profile/${user.id}`} className="text-decoration-none text-dark">
-                    {user.nombre} {user.apellidos}
-                  </Link>
-                </div>
-                <Button
-                  variant={followingIds.includes(user.id) ? "outline-danger" : "outline-primary"}
-                  size="sm"
-                  onClick={() => toggleFollow(user.id)}
-                >
-                  {followingIds.includes(user.id) ? "Dejar de seguir" : "Seguir"}
-                </Button>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        )}
-      </Card>
-    </div>
+            {loading ? (
+            <Spinner animation="border" />
+            ) : (
+            <ListGroup>
+                {users.map((user) => (
+                <ListGroup.Item key={user.id} className="d-flex align-items-center justify-content-between">
+                    <div className="d-flex align-items-center">
+                    <img
+                        src={user.photo_url || "/default-avatar.png"}
+                        alt="avatar"
+                        className="rounded-circle me-3"
+                        style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                    />
+                    <Link to={`/profile/${user.id}`} className="text-decoration-none text-dark">
+                        {user.nombre} {user.apellidos}
+                    </Link>
+                    </div>
+                    <Button
+                    variant={followingIds.includes(user.id) ? "outline-danger" : "outline-primary"}
+                    size="sm"
+                    onClick={() => toggleFollow(user.id)}
+                    >
+                    {followingIds.includes(user.id) ? "Dejar de seguir" : "Seguir"}
+                    </Button>
+                </ListGroup.Item>
+                ))}
+            </ListGroup>
+            )}
+        </Card>
+        </div>
+    </>
   );
 }
 
