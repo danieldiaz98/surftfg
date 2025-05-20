@@ -61,7 +61,7 @@ function FollowList() {
             users.map((user) => (
                 <ListGroup.Item key={user.id}>
                 <img
-                    src={user.photo_url || "/default-avatar.png"}
+                    src={user.photo_url ? user.photo_url : "/default-avatar.png"}
                     alt="avatar"
                     width="40"
                     height="40"
