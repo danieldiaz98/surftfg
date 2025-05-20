@@ -7,6 +7,7 @@ import SpotsMap from './components/SpotsMap'
 import Spots from './components/Spots'
 import Profile from './components/Profile'
 import FollowList from './components/FollowList'
+import UserExplorer from './components/UserExplorer'
 
 export const router = createBrowserRouter([
     { path: "/", element: <App /> },
@@ -15,6 +16,7 @@ export const router = createBrowserRouter([
     { path: "/Perfil", element: <Profile /> },
     { path: "/Perfil/:id/seguidores", element: <FollowList /> },
     { path: "/Perfil/:id/siguiendo", element: <FollowList /> },
+    { path: "/Explore", element: <UserExplorer /> },
     { path: "/SpotsMap", element: <SpotsMap />},
     { path: "/Spots", element: <Spots />},
     { path: "/:spotName", element: <SpotPage /> } 
