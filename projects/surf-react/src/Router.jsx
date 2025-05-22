@@ -15,6 +15,7 @@ export const router = createBrowserRouter([
     { path: "/Login", element: <Login /> },
     { path: "/Registro", element: <Register /> },
     { path: "/Perfil", element: <Profile /> },
+    { path: "/Perfil/:id", element: <Profile /> },
     { path: "/Perfil/:id/seguidores", element: <FollowList /> },
     { path: "/Perfil/:id/siguiendo", element: <FollowList /> },
     { 

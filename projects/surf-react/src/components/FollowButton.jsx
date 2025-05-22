@@ -1,61 +1,68 @@
-import { useState, useEffect } from "react";
-import { Button, Spinner } from "react-bootstrap";
-import { UserAuth } from "../context/AuthContext";
-import { followUser, unfollowUser, isFollowing } from "../supabase/followService";
+import { useEffect, useState } from "react";
+import { Button } from "react-bootstrap";
+import { client } from "../supabase/client";
 
-function FollowButton({ profileUserId }) {
-  const { session } = UserAuth();
-  const currentUserId = session?.user?.id;
-
-  const [isFollowed, setIsFollowed] = useState(false);
+function FollowButton({ targetUserId, currentUserId }) {
+  const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!currentUserId || !profileUserId) return;
-
     const checkFollowStatus = async () => {
-      try {
-        const following = await isFollowing(currentUserId, profileUserId);
-        setIsFollowed(following);
-      } catch (error) {
-        console.error("Error checking follow status:", error);
+      const { data, error } = await client
+        .from("follows")
+        .select("id")
+        .eq("follower_id", currentUserId)
+        .eq("followed_id", targetUserId)
+        .maybeSingle();
+
+      if (!error && data) {
+        setIsFollowing(true);
+      } else {
+        setIsFollowing(false);
       }
     };
 
-    checkFollowStatus();
-  }, [currentUserId, profileUserId]);
+    if (targetUserId && currentUserId) {
+      checkFollowStatus();
+    }
+  }, [targetUserId, currentUserId]);
 
-  const handleClick = async () => {
-    if (!currentUserId) return;
+  const toggleFollow = async () => {
     setLoading(true);
 
-    try {
-      if (isFollowed) {
-        await unfollowUser(currentUserId, profileUserId);
-        setIsFollowed(false);
-      } else {
-        await followUser(currentUserId, profileUserId);
-        setIsFollowed(true);
-      }
-    } catch (error) {
-      console.error("Error toggling follow:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (isFollowing) {
+      const { error } = await client
+        .from("follows")
+        .delete()
+        .eq("follower_id", currentUserId)
+        .eq("followed_id", targetUserId);
 
-  if (currentUserId === profileUserId) {
-    return null;
-  }
+      if (!error) {
+        setIsFollowing(false);
+      }
+    } else {
+      const { error } = await client.from("follows").insert([
+        {
+          follower_id: currentUserId,
+          followed_id: targetUserId,
+        },
+      ]);
+
+      if (!error) {
+        setIsFollowing(true);
+      }
+    }
+
+    setLoading(false);
+  };
 
   return (
     <Button
-      variant={isFollowed ? "outline-primary" : "primary"}
-      onClick={handleClick}
+      variant={isFollowing ? "outline-danger" : "outline-primary"}
+      onClick={toggleFollow}
       disabled={loading}
-      size="sm"
     >
-      {loading ? <Spinner animation="border" size="sm" /> : isFollowed ? "Siguiendo" : "Seguir"}
+      {loading ? "Cargando..." : isFollowing ? "Dejar de seguir" : "Seguir"}
     </Button>
   );
 }

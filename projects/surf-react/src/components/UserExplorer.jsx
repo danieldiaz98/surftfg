@@ -111,7 +111,7 @@ function UserExplorer() {
                         style={{ width: "40px", height: "40px", objectFit: "cover" }}
                       />
                       <Link
-                        to={`/profile/${user.id}`}
+                        to={`/Perfil/${user.id}`}
                         className="text-decoration-none text-dark"
                       >
                         {user.nombre} {user.apellidos}

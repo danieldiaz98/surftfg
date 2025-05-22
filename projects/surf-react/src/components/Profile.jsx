@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { client } from "../supabase/client";
 import { UserAuth } from "../context/AuthContext";
 import Navbar from "./Navbar";
@@ -8,11 +8,15 @@ import Gallery from "./Gallery";
 import PhotoUploader from "./PhotoUploader";
 import FollowStats from "./FollowStats";
 
-import { Spinner, Card, Button } from "react-bootstrap";
+import { Spinner, Card } from "react-bootstrap";
 
 function Profile() {
+  const { id } = useParams();
   const { session } = UserAuth();
   const navigate = useNavigate();
+
+  const isOwnProfile = !id || id === session?.user?.id;
+  const userId = id || session.user.id;
 
   const [perfil, setPerfil] = useState(null);
   const [galleryPhotos, setGalleryPhotos] = useState([]);
@@ -37,7 +41,7 @@ function Profile() {
       const { data, error } = await client
         .from("profiles")
         .select("nombre, apellidos, photo_url, description")
-        .eq("id", session.user.id)
+        .eq("id", userId)
         .single();
 
       if (error) console.error(error);
@@ -47,35 +51,42 @@ function Profile() {
     };
 
     const fetchGalleryPhotos = async () => {
+      const cleanProfileId = (userId || "").trim();
+
       const { data, error } = await client
         .from("profile_photos")
         .select("id, photo_url, uploaded_at")
-        .eq("user_id", session.user.id)
+        .eq("user_id", cleanProfileId)
         .order("uploaded_at", { ascending: false });
 
-      if (error) console.error(error);
-      else setGalleryPhotos(data || []);
+      if (error) {
+        console.error(error);
+        setGalleryPhotos([]);
+      } else {
+        setGalleryPhotos(data || []);
+      }
     };
 
+
     const fetchFollowStats = async () => {
-      const { count: followers, error: followersError } = await client
+      const { count: followers } = await client
         .from("follows")
         .select("*", { count: "exact", head: true })
-        .eq("followed_id", session.user.id);
+        .eq("followed_id", userId);
 
-      const { count: following, error: followingError } = await client
+      const { count: following } = await client
         .from("follows")
         .select("*", { count: "exact", head: true })
-        .eq("follower_id", session.user.id);
+        .eq("follower_id", userId);
 
-      if (!followersError) setFollowersCount(followers || 0);
-      if (!followingError) setFollowingCount(following || 0);
-    }
+      setFollowersCount(followers || 0);
+      setFollowingCount(following || 0);
+    };
 
     fetchPerfil();
     fetchGalleryPhotos();
     fetchFollowStats();
-  }, [session, navigate]);
+  }, [session, userId, navigate]);
 
   const handleUploadFotoPrincipal = async (file) => {
     try {
@@ -183,30 +194,33 @@ function Profile() {
             loading={loading}
             fileInputRef={profileFileInputRef}
             onUpload={(e) => handleUploadFotoPrincipal(e.target.files[0])}
-            email={session?.user?.email}
+            email={perfil?.email || ""}
+            profileId={userId}
+            currentUserId={session.user.id}
           />
 
           <FollowStats
             followersCount={followersCount}
             followingCount={followingCount}
-            userId={session.user.id}
+            userId={userId}
           />
-
 
           <div className="d-flex justify-content-between align-items-center my-2">
             <h5 className="mb-0 text-nowrap">Galería de fotos</h5>
-            <PhotoUploader
-              uploading={uploadingGallery}
-              fileInputRef={galleryFileInputRef}
-              onUpload={(e) => handleUploadGalleryPhoto(e.target.files[0])}
-            />
+            {isOwnProfile && (
+              <PhotoUploader
+                uploading={uploadingGallery}
+                fileInputRef={galleryFileInputRef}
+                onUpload={(e) => handleUploadGalleryPhoto(e.target.files[0])}
+              />
+            )}
           </div>
 
           <Gallery
             photos={galleryPhotos}
             selectedPhoto={selectedPhoto}
             setSelectedPhoto={setSelectedPhoto}
-            onDelete={handleDeletePhoto}
+            onDelete={isOwnProfile ? handleDeletePhoto : undefined}
           />
         </Card>
       </div>

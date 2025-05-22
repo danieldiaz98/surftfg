@@ -18,15 +18,17 @@ function Gallery({ photos, selectedPhoto, setSelectedPhoto, onDelete }) {
                   style={{ height: "150px", objectFit: "cover", cursor: "pointer" }}
                   onClick={() => setSelectedPhoto(photo.photo_url)}
                 />
-                <Button
-                  variant="danger"
-                  size="sm"
-                  className="position-absolute top-0 end-0 m-1"
-                  onClick={() => onDelete(photo.id, photo.photo_url)}
-                  aria-label="Eliminar foto"
-                >
-                  &times;
-                </Button>
+                {onDelete && (
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    className="position-absolute top-0 end-0 m-1"
+                    onClick={() => onDelete(photo.id, photo.photo_url)}
+                    aria-label="Eliminar foto"
+                  >
+                    &times;
+                  </Button>
+                )}
               </Card>
             </Col>
           ))}

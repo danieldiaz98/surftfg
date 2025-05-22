@@ -1,7 +1,15 @@
 import { Image, Button } from "react-bootstrap";
 import FollowButton from "./FollowButton";
 
-function ProfileHeader({ perfil, loading, fileInputRef, onUpload, email, profileId, currentUserId }) {
+function ProfileHeader({
+  perfil,
+  loading,
+  fileInputRef,
+  onUpload,
+  email,
+  profileId,
+  currentUserId
+}) {
   const isOwnProfile = profileId === currentUserId;
 
   return (
@@ -18,8 +26,9 @@ function ProfileHeader({ perfil, loading, fileInputRef, onUpload, email, profile
             border: "4px solid #007bff"
           }}
         />
+
         {isOwnProfile && (
-          <>
+          <div>
             <input
               type="file"
               ref={fileInputRef}
@@ -34,7 +43,7 @@ function ProfileHeader({ perfil, loading, fileInputRef, onUpload, email, profile
             >
               {loading ? "Subiendo..." : "Cambiar"}
             </Button>
-          </>
+          </div>
         )}
       </div>
 
