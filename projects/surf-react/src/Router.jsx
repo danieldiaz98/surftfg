@@ -28,5 +28,5 @@ export const router = createBrowserRouter([
     },
     { path: "/SpotsMap", element: <SpotsMap /> },
     { path: "/Spots", element: <Spots /> },
-    { path: "/:spotName", element: <SpotPage /> }
+    { path: "/Spot/:spotId", element: <SpotPage /> }
 ])

@@ -24,10 +24,12 @@ function Spots() {
           {spots.map((spot) => (
             <div key={spot.id} className="col-sm-6 col-md-4">
               <SpotCard
+                id={spot.id}
                 name={spot.Name}
                 location={spot.Location}
                 imageUrl={spot.image_url}
               />
+
             </div>
           ))}
         </div>

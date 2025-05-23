@@ -2,7 +2,7 @@ import { client } from './client';
 
 export async function getAllSpots() {
     const { data, error } = await client
-        .from('Spots')
+        .from('spots')
         .select('*');
 
     if (error) {
@@ -15,9 +15,9 @@ export async function getAllSpots() {
 
 export async function getSpotByName(name) {
     const { data, error } = await client
-        .from('Spots')
+        .from('spots')       // tabla en minúscula
         .select('*')
-        .eq('Name', name)
+        .eq('name', name)    // columna en minúscula
         .single();
 
     if (error) {
