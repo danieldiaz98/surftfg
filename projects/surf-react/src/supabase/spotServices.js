@@ -27,3 +27,17 @@ export async function getSpotByName(name) {
 
     return data;
 }
+
+export async function getFavoriteSpotsForUser(userId) {
+  const { data, error } = await client
+    .from("favorite_spots")
+    .select("spot_id, spots(*)")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Error fetching favorite spots:", error);
+    return [];
+  }
+
+  return data.map(entry => entry.spots);
+}
