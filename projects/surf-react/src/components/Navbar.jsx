@@ -1,6 +1,6 @@
 import './styles/Navbar.css';
 import { Link, useNavigate } from "react-router-dom";
-import { UserAuth } from "../context/AuthContext";  // Ajusta el path si hace falta
+import { UserAuth } from "../context/AuthContext";
 import { useState } from "react";
 
 function Navbar() {
@@ -45,10 +45,13 @@ function Navbar() {
             {session && (
               <>
                 <li className="nav-item">
-                  <Link to="/Perfil" className="nav-link" onClick={() => setExpanded(false)}>Perfil</Link>
+                  <Link to="/Explore" className="nav-link" onClick={() => setExpanded(false)}>Explorar</Link>
                 </li>
                 <li className="nav-item">
-                  <Link to="/Explore" className="nav-link" onClick={() => setExpanded(false)}>Explorar</Link>
+                  <Link to="/Favoritos" className="nav-link" onClick={() => setExpanded(false)}>Favoritos</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/Perfil" className="nav-link" onClick={() => setExpanded(false)}>Perfil</Link>
                 </li>
               </>
             )}
