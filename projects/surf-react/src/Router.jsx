@@ -9,6 +9,7 @@ import Profile from './components/Profile'
 import FollowList from './components/FollowList'
 import UserExplorer from './components/UserExplorer'
 import PrivateRoute from './components/PrivateRoute'
+import FavoritesPage from './components/FavoritesPage'
 
 export const router = createBrowserRouter([
     { path: "/", element: <App /> },
@@ -28,5 +29,8 @@ export const router = createBrowserRouter([
     },
     { path: "/SpotsMap", element: <SpotsMap /> },
     { path: "/Spots", element: <Spots /> },
-    { path: "/Spot/:spotId", element: <SpotPage /> }
+    { path: "/Spot/:spotId", element: <SpotPage /> },
+    { path: "/Favoritos", element: <FavoritesPage /> }
+    
+
 ])
