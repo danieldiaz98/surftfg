@@ -25,7 +25,7 @@ function Spots() {
             <div key={spot.id} className="col-sm-6 col-md-4">
               <SpotCard
                 id={spot.id}
-                name={spot.Name}
+                name={spot.name}
                 location={spot.Location}
                 imageUrl={spot.image_url}
               />

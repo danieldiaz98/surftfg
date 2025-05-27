@@ -30,7 +30,7 @@ function SpotsMap() {
         const allSpots = await getAllSpots();
         const spotsWithCoords = await Promise.all(
           allSpots.map(async (spot) => {
-            const fullPlaceName = `${spot.Name}, ${spot.Location}`;
+            const fullPlaceName = `${spot.name}, ${spot.Location}`;
             const coords = await getCoordinatesFromPlaceNameGoogle(fullPlaceName);
             return coords ? { ...spot, coordinates: coords } : null;
           })
@@ -70,7 +70,7 @@ function SpotsMap() {
                   <Marker
                     key={index}
                     position={spot.coordinates}
-                    title={spot.Name}
+                    title={spot.name}
                     onClick={() => setSelectedSpot(spot)}
                   />
                 ))}
@@ -82,11 +82,11 @@ function SpotsMap() {
                 >
                   <div className="p-2 rounded shadow-sm bg-white text-center" style={{ maxWidth: "250px" }}>
                     <h6 className="mb-2 text-primary fw-bold">
-                      {selectedSpot.Name}
+                      {selectedSpot.name}
                     </h6>
                 
                     <Link
-                      to={`/${encodeURIComponent(selectedSpot.Name)}`}
+                      to={`/Spot/${encodeURIComponent(selectedSpot.id)}`}
                       className="btn btn-outline-primary btn-sm d-block mb-2"
                     >
                       Ver detalles

@@ -33,7 +33,7 @@ function SpotPage() {
 
   useEffect(() => {
     if (spot) {
-      const fullPlaceName = `${spot.name}, ${spot.location}`;
+      const fullPlaceName = `${spot.name}, ${spot.Location}`;
       getCoordinatesFromPlaceNameGoogle(fullPlaceName)
         .then((coords) => {
           setCoordinates(coords);

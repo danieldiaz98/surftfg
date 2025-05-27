@@ -30,7 +30,6 @@ export const router = createBrowserRouter([
     { path: "/SpotsMap", element: <SpotsMap /> },
     { path: "/Spots", element: <Spots /> },
     { path: "/Spot/:spotId", element: <SpotPage /> },
-    { path: "/Favoritos", element: <FavoritesPage /> }
-    
+    { path: "/Favoritos", element: <FavoritesPage /> },
 
 ])
