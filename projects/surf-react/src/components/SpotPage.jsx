@@ -4,6 +4,15 @@ import Navbar from "./Navbar";
 import getCoordinatesFromPlaceNameGoogle from "../SpotInfo/Location";
 import getWeatherData from "../SpotInfo/Weather";
 import { client } from "../supabase/client";
+import { GoogleMap, LoadScriptNext, Marker } from "@react-google-maps/api";
+
+const mapContainerStyle = {
+  width: "100%",
+  height: "300px",
+  borderRadius: "12px",
+  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+  marginTop: "20px"
+};
 
 function SpotPage() {
   const { spotId } = useParams();
@@ -86,10 +95,8 @@ function SpotPage() {
       <div className="container py-5">
         <div className="row justify-content-center">
           <div className="col-lg-8 text-center">
-            {/* Título del spot */}
             <h1 className="display-4 mb-4">{spot.name}</h1>
 
-            {/* Imagen del spot */}
             {spot.image_url && (
               <img
                 src={spot.image_url}
@@ -99,10 +106,7 @@ function SpotPage() {
               />
             )}
 
-            {/* Ubicación */}
             <h5 className="text-muted mb-3">{spot.Location}</h5>
-
-            {/* Descripción */}
             <p className="fs-5">{spot.Description}</p>
 
             {/* Datos meteorológicos */}
@@ -131,6 +135,31 @@ function SpotPage() {
                 </div>
               </div>
             </div>
+
+            {/* Mini mapa con marcador */}
+            {coordinates && (
+              <div className="mt-5">
+                <h4 className="mb-3">Ubicación en el mapa</h4>
+                <LoadScriptNext googleMapsApiKey="AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw">
+                  <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    center={coordinates}
+                    zoom={14}
+                  >
+                    <Marker
+                      position={coordinates}
+                      title={spot.name}
+                      onClick={() =>
+                        window.open(
+                          `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}`,
+                          "_blank"
+                        )
+                      }
+                    />
+                  </GoogleMap>
+                </LoadScriptNext>
+              </div>
+            )}
           </div>
         </div>
       </div>
