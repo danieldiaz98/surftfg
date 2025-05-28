@@ -5,21 +5,27 @@ import getCoordinatesFromPlaceNameGoogle from "../SpotInfo/Location";
 import getWeatherData from "../SpotInfo/Weather";
 import { client } from "../supabase/client";
 import { GoogleMap, LoadScriptNext, Marker } from "@react-google-maps/api";
+import { UserAuth } from "../context/AuthContext";
 
 const mapContainerStyle = {
   width: "100%",
   height: "300px",
   borderRadius: "12px",
   boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
-  marginTop: "20px"
+  marginTop: "20px",
 };
 
 function SpotPage() {
   const { spotId } = useParams();
+  const { session } = UserAuth();
   const [spot, setSpot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [coordinates, setCoordinates] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
+  const [comment, setComment] = useState("");
+  const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [recentPosts, setRecentPosts] = useState([]);
 
   useEffect(() => {
     async function fetchSpot() {
@@ -44,28 +50,95 @@ function SpotPage() {
     if (spot) {
       const fullPlaceName = `${spot.name}, ${spot.Location}`;
       getCoordinatesFromPlaceNameGoogle(fullPlaceName)
-        .then((coords) => {
-          setCoordinates(coords);
-          console.log("Coordenadas:", coords);
-        })
-        .catch((error) => {
-          console.error("Error obteniendo coordenadas:", error);
-        });
+        .then((coords) => setCoordinates(coords))
+        .catch((error) => console.error("Error obteniendo coordenadas:", error));
     }
   }, [spot]);
 
   useEffect(() => {
     if (coordinates) {
       getWeatherData(coordinates.lat, coordinates.lng)
-        .then((data) => {
-          setWeatherData(data);
-          console.log("Datos meteorológicos:", data);
-        })
-        .catch((error) => {
-          console.error("Error obteniendo datos meteorológicos:", error);
-        });
+        .then((data) => setWeatherData(data))
+        .catch((error) => console.error("Error obteniendo clima:", error));
     }
   }, [coordinates]);
+
+  useEffect(() => {
+    const fetchRecentPosts = async () => {
+      const { data, error } = await client
+        .from("spot_posts")
+        .select("id, comment, image_url, created_at, user_id")
+        .eq("spot_id", spotId)
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      if (error) {
+        console.error("Error al obtener publicaciones recientes:", error.message);
+      } else {
+        setRecentPosts(data);
+      }
+    };
+
+    if (spotId) {
+      fetchRecentPosts();
+    }
+  }, [spotId]);
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    console.log("📥 handleUpload ejecutado");
+
+    if (!session || !image || !comment) {
+      console.log("❌ Faltan datos:", { session, image, comment });
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      const fileExt = image.name.split('.').pop();
+      const fileName = `${Date.now()}-${session.user.id}.${fileExt}`;
+      const filePath = `posts/${fileName}`;
+
+      let { error: uploadError } = await client.storage
+        .from("spot-posts")
+        .upload(filePath, image);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = client.storage
+        .from("spot-posts")
+        .getPublicUrl(filePath);
+
+      console.log("✅ Datos de la publicación:", {
+        spot_id: spot?.id,
+        user_id: session?.user?.id,
+        comment,
+        image_url: publicUrl,
+      });
+
+      const { error: insertError } = await client
+        .from("spot_posts")
+        .insert({
+          user_id: session.user.id,
+          spot_id: spot.id,
+          comment,
+          image_url: publicUrl,
+        });
+
+      if (insertError) throw insertError;
+
+      alert("¡Publicación subida con éxito!");
+      setComment("");
+      setImage(null);
+    } catch (error) {
+      console.error("❌ Error al subir la publicación:", error.message);
+      alert("Error al subir la publicación");
+    } finally {
+      setUploading(false);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -109,7 +182,6 @@ function SpotPage() {
             <h5 className="text-muted mb-3">{spot.Location}</h5>
             <p className="fs-5">{spot.Description}</p>
 
-            {/* Datos meteorológicos */}
             <div className="mt-5 p-4 rounded shadow bg-light text-start">
               <h4 className="mb-4">Condiciones meteorológicas (última hora)</h4>
               <div className="row">
@@ -136,11 +208,11 @@ function SpotPage() {
               </div>
             </div>
 
-            {/* Mini mapa con marcador */}
+            {/* Mini mapa */}
             {coordinates && (
               <div className="mt-5">
                 <h4 className="mb-3">Ubicación en el mapa</h4>
-                <LoadScriptNext googleMapsApiKey="AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw">
+                <LoadScriptNext googleMapsApiKey={'AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw'}>
                   <GoogleMap
                     mapContainerStyle={mapContainerStyle}
                     center={coordinates}
@@ -159,6 +231,67 @@ function SpotPage() {
                   </GoogleMap>
                 </LoadScriptNext>
               </div>
+            )}
+          <h2 className="mb-4">Actualizaciones de la zona realizadas por los usuarios</h2>
+          {recentPosts.length > 0 ? (
+            <div className="mt-5">
+              <h4 className="mb-3">Últimas publicaciones</h4>
+              {recentPosts.map((post) => (
+                <div key={post.id} className="mb-4 p-3 bg-light rounded shadow-sm">
+                  <img
+                    src={post.image_url}
+                    alt="Publicación"
+                    className="img-fluid rounded mb-2"
+                    style={{ maxHeight: "300px", objectFit: "cover" }}
+                  />
+                  <p className="mb-1">{post.comment}</p>
+                  <small className="text-muted">
+                    Publicado el {new Date(post.created_at).toLocaleString()}
+                  </small>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4">No hay publicaciones aún.</p>
+          )}
+
+
+            {/* Formulario para compartir estado del spot */}
+            {session ? (
+              <div className="mt-5 text-start">
+                <h4 className="mb-3">Comparte el estado del spot</h4>
+                <form onSubmit={handleUpload}>
+                  <div className="mb-3">
+                    <label className="form-label">Comentario</label>
+                    <textarea
+                      className="form-control"
+                      rows="3"
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Imagen</label>
+                    <input
+                      type="file"
+                      className="form-control"
+                      accept="image/*"
+                      onChange={(e) => setImage(e.target.files[0])}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={uploading}
+                  >
+                    {uploading ? "Subiendo..." : "Publicar"}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <p className="mt-5 text-muted">Inicia sesión para compartir información del spot.</p>
             )}
           </div>
         </div>
