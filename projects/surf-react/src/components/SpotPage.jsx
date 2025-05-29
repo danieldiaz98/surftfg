@@ -6,6 +6,7 @@ import getWeatherData from "../SpotInfo/Weather";
 import { client } from "../supabase/client";
 import { GoogleMap, LoadScriptNext, Marker } from "@react-google-maps/api";
 import { UserAuth } from "../context/AuthContext";
+import { Modal } from "react-bootstrap";
 
 const mapContainerStyle = {
   width: "100%",
@@ -26,6 +27,7 @@ function SpotPage() {
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [recentPosts, setRecentPosts] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     async function fetchSpot() {
@@ -67,7 +69,7 @@ function SpotPage() {
     const fetchRecentPosts = async () => {
       const { data, error } = await client
         .from("spot_posts")
-        .select("id, comment, image_url, created_at, user_id")
+        .select("id, comment, image_url, created_at, profiles(nombre, apellidos, photo_url)")
         .eq("spot_id", spotId)
         .order("created_at", { ascending: false })
         .limit(3);
@@ -78,6 +80,7 @@ function SpotPage() {
         setRecentPosts(data);
       }
     };
+    
 
     if (spotId) {
       fetchRecentPosts();
@@ -138,7 +141,6 @@ function SpotPage() {
       setUploading(false);
     }
   };
-
 
   if (loading) {
     return (
@@ -232,28 +234,75 @@ function SpotPage() {
                 </LoadScriptNext>
               </div>
             )}
-          <h2 className="mb-4">Actualizaciones de la zona realizadas por los usuarios</h2>
-          {recentPosts.length > 0 ? (
-            <div className="mt-5">
-              <h4 className="mb-3">Últimas publicaciones</h4>
-              {recentPosts.map((post) => (
-                <div key={post.id} className="mb-4 p-3 bg-light rounded shadow-sm">
-                  <img
-                    src={post.image_url}
-                    alt="Publicación"
-                    className="img-fluid rounded mb-2"
-                    style={{ maxHeight: "300px", objectFit: "cover" }}
-                  />
-                  <p className="mb-1">{post.comment}</p>
-                  <small className="text-muted">
-                    Publicado el {new Date(post.created_at).toLocaleString()}
-                  </small>
+            <br/>
+            <h2 className="mb-5 text-center">Actualizaciones de la zona realizadas por los usuarios</h2>
+            {recentPosts.length > 0 ? (
+              <div className="container">
+                <h4 className="mb-4">Últimas publicaciones</h4>
+                <div className="row g-4">
+                  {recentPosts.map((post) => (
+                    <div key={post.id} className="col-md-4">
+                      <div className="card h-100 shadow-sm">
+                        <img
+                          src={post.image_url}
+                          alt="Publicación"
+                          className="card-img-top"
+                          onClick={() => setSelectedImage(post.image_url)}
+                          style={{ height: "200px", objectFit: "cover", cursor: "pointer" }}
+                        />
+                        <div className="card-body d-flex flex-column">
+                          <p className="card-text flex-grow-1">{post.comment}</p>
+                          <div className="d-flex align-items-center mt-3">
+                            {post.profiles?.photo_url ? (
+                              <img
+                                src={post.profiles.photo_url}
+                                alt="Foto de perfil"
+                                className="rounded-circle me-2"
+                                style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                              />
+                            ) : (
+                              <div
+                                className="rounded-circle bg-secondary me-2"
+                                style={{ width: "40px", height: "40px" }}
+                              />
+                            )}
+                            <div>
+                              <small className="text-muted d-block">
+                                {post.profiles?.nombre + " " + post.profiles?.apellidos || "Usuario anónimo"}
+                              </small>
+                              <small className="text-muted">
+                                📅 {new Date(post.created_at).toLocaleString()}
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-4">No hay publicaciones aún.</p>
-          )}
+              </div>
+            ) : (
+              <p className="mt-4 text-muted text-center">No hay publicaciones aún.</p>
+            )}
+
+            <Modal
+              show={!!selectedImage}
+              onHide={() => setSelectedImage(null)}
+              centered
+              size="lg"
+            >
+              <Modal.Header closeButton>
+              </Modal.Header>
+              <Modal.Body className="text-center bg-dark">
+                <img
+                  src={selectedImage}
+                  alt="Vista ampliada"
+                  className="img-fluid rounded"
+                />
+              </Modal.Body>
+            </Modal>
+
+
 
 
             {/* Formulario para compartir estado del spot */}
