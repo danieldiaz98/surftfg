@@ -44,6 +44,7 @@ function Register() {
               id: user.id,
               nombre,
               apellidos,
+              email
             },
           ]);
 

@@ -40,7 +40,7 @@ function Profile() {
       setLoading(true);
       const { data, error } = await client
         .from("profiles")
-        .select("nombre, apellidos, photo_url, description")
+        .select("nombre, apellidos, photo_url, description, email")
         .eq("id", userId)
         .single();
 

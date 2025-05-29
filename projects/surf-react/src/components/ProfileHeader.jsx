@@ -56,7 +56,7 @@ function ProfileHeader({
         )}
       </div>
 
-      <p className="text-muted mb-0">{email}</p>
+      {email && <p className="text-muted mb-0">{email}</p>}
     </div>
   );
 }
