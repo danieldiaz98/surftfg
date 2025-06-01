@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { client } from "../supabase/client";
+import { Modal } from "react-bootstrap";
 
 function UserProducts({ userId, isOwnProfile }) {
   const [products, setProducts] = useState([]);
@@ -7,11 +8,16 @@ function UserProducts({ userId, isOwnProfile }) {
     title: "",
     description: "",
     price: "",
-    image: null,
+    images: [],
   });
+  const [editingId, setEditingId] = useState(null);
+  const [editedProduct, setEditedProduct] = useState({});
   const [uploading, setUploading] = useState(false);
 
-  // Fetch de productos
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [modalImages, setModalImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   useEffect(() => {
     const fetchProducts = async () => {
       const { data, error } = await client
@@ -27,47 +33,56 @@ function UserProducts({ userId, isOwnProfile }) {
     if (userId) fetchProducts();
   }, [userId]);
 
-  // Subida de producto
   const handleProductUpload = async (e) => {
     e.preventDefault();
 
-    if (!newProduct.title || !newProduct.description || !newProduct.price || !newProduct.image) {
-      alert("Completa todos los campos.");
+    const { title, description, price, images } = newProduct;
+
+    if (!title || !description || !price || images.length === 0) {
+      alert("Completa todos los campos e incluye al menos una imagen.");
+      return;
+    }
+
+    if (images.length > 3) {
+      alert("Solo se permiten hasta 3 imágenes por producto.");
       return;
     }
 
     try {
       setUploading(true);
-      const fileExt = newProduct.image.name.split(".").pop();
-      const fileName = `${Date.now()}-${userId}.${fileExt}`;
-      const filePath = `products/${fileName}`;
+      const imageUrls = [];
 
-      const { error: uploadError } = await client.storage
-        .from("products-imgs")
-        .upload(filePath, newProduct.image);
+      for (let image of images) {
+        const fileExt = image.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+        const filePath = `products/${fileName}`;
 
-      if (uploadError) throw uploadError;
+        const { error: uploadError } = await client.storage
+          .from("products-imgs")
+          .upload(filePath, image);
 
-      const { data: { publicUrl } } = client.storage
-        .from("products-imgs")
-        .getPublicUrl(filePath);
+        if (uploadError) throw uploadError;
+
+        const { data } = client.storage
+          .from("products-imgs")
+          .getPublicUrl(filePath);
+
+        imageUrls.push(data.publicUrl);
+      }
 
       const { error: insertError } = await client
         .from("products")
         .insert({
           user_id: userId,
-          title: newProduct.title,
-          description: newProduct.description,
-          price: parseFloat(newProduct.price),
-          image_url: publicUrl,
+          title,
+          description,
+          price: parseFloat(price),
+          image_urls: imageUrls,
         });
 
       if (insertError) throw insertError;
 
-      setNewProduct({ title: "", description: "", price: "", image: null });
-      alert("Producto publicado exitosamente.");
-
-      // Refetch
+      setNewProduct({ title: "", description: "", price: "", images: [] });
       const { data: updatedProducts } = await client
         .from("products")
         .select("*")
@@ -82,17 +97,15 @@ function UserProducts({ userId, isOwnProfile }) {
     }
   };
 
-  // Eliminar producto
-  const handleDelete = async (productId, imageUrl) => {
-    const confirm = window.confirm("¿Estás seguro de que quieres eliminar este producto?");
-    if (!confirm) return;
+  const handleDelete = async (productId, imageUrls) => {
+    if (!window.confirm("¿Eliminar este producto?")) return;
 
     try {
-      const filePath = imageUrl.split("/products-imgs/")[1];
+      const paths = imageUrls.map((url) => url.split("/products-imgs/")[1]);
 
       const { error: deleteImageError } = await client.storage
         .from("products-imgs")
-        .remove([filePath]);
+        .remove(paths);
 
       if (deleteImageError) throw deleteImageError;
 
@@ -108,6 +121,80 @@ function UserProducts({ userId, isOwnProfile }) {
       console.error("Error al eliminar producto:", error.message);
     }
   };
+
+  const startEditing = (product) => {
+    setEditingId(product.id);
+    setEditedProduct({
+      title: product.title,
+      description: product.description,
+      price: product.price,
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditedProduct({});
+  };
+
+  const saveEditedProduct = async (productId) => {
+    const { title, description, price } = editedProduct;
+
+    try {
+      const { error } = await client
+        .from("products")
+        .update({
+          title,
+          description,
+          price: parseFloat(price),
+        })
+        .eq("id", productId);
+
+      if (error) throw error;
+
+      const { data: updatedProducts } = await client
+        .from("products")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      setProducts(updatedProducts);
+      cancelEditing();
+    } catch (error) {
+      console.error("Error al editar producto:", error.message);
+    }
+  };
+
+  const openImageModal = (images, index = 0) => {
+    setModalImages(images);
+    setCurrentImageIndex(index);
+    setShowImageModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowImageModal(false);
+    setModalImages([]);
+    setCurrentImageIndex(0);
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % modalImages.length);
+  };
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + modalImages.length) % modalImages.length);
+  };
+
+  // Navegación con flechas del teclado
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!showImageModal) return;
+      if (e.key === "ArrowRight") handleNextImage();
+      if (e.key === "ArrowLeft") handlePrevImage();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showImageModal, modalImages]);
 
   return (
     <div className="mt-5">
@@ -139,7 +226,11 @@ function UserProducts({ userId, isOwnProfile }) {
               type="file"
               className="form-control mb-2"
               accept="image/*"
-              onChange={(e) => setNewProduct({ ...newProduct, image: e.target.files[0] })}
+              multiple
+              onChange={(e) => {
+                const selectedFiles = Array.from(e.target.files).slice(0, 3);
+                setNewProduct({ ...newProduct, images: selectedFiles });
+              }}
             />
             <button className="btn btn-primary" type="submit" disabled={uploading}>
               {uploading ? "Publicando..." : "Publicar producto"}
@@ -154,26 +245,71 @@ function UserProducts({ userId, isOwnProfile }) {
           products.map((product) => (
             <div key={product.id} className="col-md-4 mb-4">
               <div className="card h-100">
-                <img
-                  src={product.image_url}
-                  className="card-img-top"
-                  alt={product.title}
-                  style={{ height: "200px", objectFit: "cover" }}
-                />
+                {product.image_urls?.length > 0 && (
+                  <div className="d-flex overflow-auto gap-2 p-2">
+                    {product.image_urls.map((url, idx) => (
+                      <img
+                        key={idx}
+                        src={url}
+                        alt={`Imagen ${idx + 1}`}
+                        style={{ height: "140px", width: "140px", objectFit: "cover", flexShrink: 0 }}
+                        className="rounded"
+                        onClick={() => openImageModal(product.image_urls, idx)}
+                      />
+                    ))}
+                  </div>
+                )}
                 <div className="card-body d-flex flex-column">
-                  <h5 className="card-title">{product.title}</h5>
-                  <p className="card-text">{product.description}</p>
-                  <p className="text-success fw-bold">{product.price}€</p>
-                  <small className="text-muted mt-auto">
-                    Publicado el {new Date(product.created_at).toLocaleDateString()}
-                  </small>
-                  {isOwnProfile && (
-                    <button
-                      className="btn btn-danger btn-sm mt-2"
-                      onClick={() => handleDelete(product.id, product.image_url)}
-                    >
-                      Eliminar
-                    </button>
+                  {editingId === product.id ? (
+                    <>
+                      <input
+                        type="text"
+                        className="form-control mb-2"
+                        value={editedProduct.title}
+                        onChange={(e) => setEditedProduct({ ...editedProduct, title: e.target.value })}
+                      />
+                      <textarea
+                        className="form-control mb-2"
+                        value={editedProduct.description}
+                        onChange={(e) => setEditedProduct({ ...editedProduct, description: e.target.value })}
+                      />
+                      <input
+                        type="number"
+                        className="form-control mb-2"
+                        value={editedProduct.price}
+                        onChange={(e) => setEditedProduct({ ...editedProduct, price: e.target.value })}
+                      />
+                      <div className="d-flex gap-2">
+                        <button className="btn btn-success btn-sm" onClick={() => saveEditedProduct(product.id)}>
+                          Guardar
+                        </button>
+                        <button className="btn btn-secondary btn-sm" onClick={cancelEditing}>
+                          Cancelar
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h5 className="card-title">{product.title}</h5>
+                      <p className="card-text">{product.description}</p>
+                      <p className="text-success fw-bold">${product.price}</p>
+                      <small className="text-muted mt-auto">
+                        Publicado el {new Date(product.created_at).toLocaleDateString()}
+                      </small>
+                      {isOwnProfile && (
+                        <div className="d-flex gap-2 mt-2">
+                          <button className="btn btn-warning btn-sm" onClick={() => startEditing(product)}>
+                            Editar
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDelete(product.id, product.image_urls)}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -183,6 +319,34 @@ function UserProducts({ userId, isOwnProfile }) {
           <p className="text-muted">No hay productos publicados.</p>
         )}
       </div>
+      <Modal show={showImageModal} onHide={handleCloseModal} centered size="lg">
+        <Modal.Header closeButton />
+        <Modal.Body className="text-center position-relative">
+          {modalImages.length > 0 && (
+            <div
+              style={{ position: "relative", cursor: "pointer" }}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                if (clickX < rect.width / 2) handlePrevImage();
+                else handleNextImage();
+              }}
+            >
+              <img
+                src={modalImages[currentImageIndex]}
+                alt={`Imagen ${currentImageIndex + 1}`}
+                style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain" }}
+              />
+              {modalImages.length > 1 && (
+                <>
+                  <div className="position-absolute top-50 start-0 translate-middle-y ps-3 text-white fs-2">←</div>
+                  <div className="position-absolute top-50 end-0 translate-middle-y pe-3 text-white fs-2">→</div>
+                </>
+              )}
+            </div>
+          )}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }
