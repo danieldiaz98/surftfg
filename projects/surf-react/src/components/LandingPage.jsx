@@ -22,7 +22,7 @@ function LandingPage() {
         <h1 className="display-3 fw-bold">Bienvenido a Waver</h1>
         <p className="lead">Tu comunidad de surfistas, spots y condiciones en tiempo real</p>
         <div className="mt-4">
-          <Link to="/register" className="btn btn-primary btn-lg mx-2">
+          <Link to="/Registro" className="btn btn-primary btn-lg mx-2">
             Regístrate
           </Link>
           <Link to="/spots" className="btn btn-outline-light btn-lg mx-2">
@@ -31,7 +31,6 @@ function LandingPage() {
         </div>
       </header>
 
-      {/* Features */}
       <section className="container py-5">
         <h2 className="text-center mb-4">¿Qué puedes hacer?</h2>
         <div className="row text-center">
