@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/cli": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
     "@chatscope/chat-ui-kit-react": "^2.1.1",
     "@react-google-maps/api": "^2.20.6",
     "@supabase/supabase-js": "^2.49.4",
