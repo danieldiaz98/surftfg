@@ -59,7 +59,6 @@ function SpotCard({ id, name, location, imageUrl }) {
 
         setIsFavorite(false);
       } else {
-        // Añadir favorito
         const { error } = await client
           .from("favorite_spots")
           .insert({ user_id: session.user.id, spot_id: id });

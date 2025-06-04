@@ -15,9 +15,9 @@ export async function getAllSpots() {
 
 export async function getSpotByName(name) {
     const { data, error } = await client
-        .from('spots')       // tabla en minúscula
+        .from('spots')
         .select('*')
-        .eq('name', name)    // columna en minúscula
+        .eq('name', name)
         .single();
 
     if (error) {

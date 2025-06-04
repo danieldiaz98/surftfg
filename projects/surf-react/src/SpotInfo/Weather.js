@@ -12,7 +12,6 @@ async function getWeatherData(lat, lng) {
     );
 
     const data = await response.json();
-    console.log("Respuesta completa:", data);
 
     if (!data.hours || data.hours.length === 0) {
       throw new Error("No hay datos disponibles para la ubicación y hora solicitadas.");

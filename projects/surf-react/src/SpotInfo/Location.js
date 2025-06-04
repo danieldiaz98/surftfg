@@ -10,9 +10,6 @@ async function getCoordinatesFromPlaceNameGoogle(placeName) {
       const lat = data.results[0].geometry.location.lat;
       const lng = data.results[0].geometry.location.lng;
 
-      console.log(`Coordenadas de "${placeName}":`);
-      console.log(`Latitud: ${lat}, Longitud: ${lng}`);
-
       return { lat, lng };
     } else {
       throw new Error(`No se encontraron coordenadas para: ${placeName}`);
@@ -22,5 +19,4 @@ async function getCoordinatesFromPlaceNameGoogle(placeName) {
     return null;
   }
 }
-getCoordinatesFromPlaceNameGoogle("El Confital, Las Palmas de Gran Canaria, Gran Canaria, España")
 export default getCoordinatesFromPlaceNameGoogle;

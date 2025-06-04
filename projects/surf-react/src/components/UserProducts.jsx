@@ -184,7 +184,6 @@ function UserProducts({ userId, isOwnProfile }) {
     setCurrentImageIndex((prev) => (prev - 1 + modalImages.length) % modalImages.length);
   };
 
-  // Navegación con flechas del teclado
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!showImageModal) return;

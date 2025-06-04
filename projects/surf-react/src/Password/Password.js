@@ -7,14 +7,14 @@ class Password {
     isValid() {
         if (this.password.length < 6) {
             console.error("La contraseña debe tener al menos 6 caracteres");
-            return false; // La contraseña es demasiado corta
+            return false;
         }
         else if (this.password.length >= 6 && !this.password === this.repeatPassword) {
             console.log("Las contraseñas no coinciden");
-            return false; // La contraseña no coincide con la repetida
+            return false;
         } else if (this.password.length >= 6 && this.password === this.repeatPassword) {
             console.log("Las contraseñas coinciden");
-            return true; // La contraseña es válida
+            return true;
         }
     }
 }

@@ -7,7 +7,6 @@ export const AuthContextProvider = ({ children }) => {
   const [session, setSession] = useState(undefined); // undefined para saber si aún está cargando
 
   useEffect(() => {
-    // Obtener sesión actual
     const getSession = async () => {
       const { data, error } = await client.auth.getSession();
       if (error) {
@@ -19,7 +18,6 @@ export const AuthContextProvider = ({ children }) => {
 
     getSession();
 
-    // Suscribirse a cambios de sesión
     const { data: authListener } = client.auth.onAuthStateChange(
       (_event, newSession) => {
         setSession(newSession);
@@ -27,7 +25,7 @@ export const AuthContextProvider = ({ children }) => {
     );
 
     return () => {
-      authListener.subscription.unsubscribe(); // limpiar la suscripción
+      authListener.subscription.unsubscribe();
     };
   }, []);
 

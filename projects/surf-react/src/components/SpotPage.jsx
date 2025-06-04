@@ -113,13 +113,6 @@ function SpotPage() {
         .from("spot-posts")
         .getPublicUrl(filePath);
 
-      console.log("✅ Datos de la publicación:", {
-        spot_id: spot?.id,
-        user_id: session?.user?.id,
-        comment,
-        image_url: publicUrl,
-      });
-
       const { error: insertError } = await client
         .from("spot_posts")
         .insert({
@@ -210,7 +203,6 @@ function SpotPage() {
               </div>
             </div>
 
-            {/* Mini mapa */}
             {coordinates && (
               <div className="mt-5">
                 <h4 className="mb-3">Ubicación en el mapa</h4>
@@ -302,10 +294,6 @@ function SpotPage() {
               </Modal.Body>
             </Modal>
 
-
-
-
-            {/* Formulario para compartir estado del spot */}
             {session ? (
               <div className="mt-5 text-start">
                 <h4 className="mb-3">Comparte el estado del spot</h4>
