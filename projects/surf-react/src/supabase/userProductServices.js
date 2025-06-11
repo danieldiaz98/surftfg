@@ -83,3 +83,9 @@ export const updateProduct = async (productId, { title, description, price }) =>
 
   if (error) throw new Error(error.message);
 };
+
+export const fetchAllProductsExceptUser = async (userId) => {
+  const res = await fetch(`/api/products?excludeUserId=${userId}`);
+  if (!res.ok) throw new Error("No se pudieron obtener los productos de otros usuarios");
+  return await res.json();
+};

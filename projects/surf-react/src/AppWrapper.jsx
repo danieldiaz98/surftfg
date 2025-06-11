@@ -8,7 +8,6 @@ export default function AppWrapper() {
   const { session } = UserAuth();
 
   if (session === undefined) {
-    // Supabase aún no ha cargado la sesión
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
         <Spinner animation="border" />
