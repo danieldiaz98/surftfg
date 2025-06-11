@@ -11,6 +11,7 @@ import UserExplorer from './components/UserExplorer'
 import PrivateRoute from './components/PrivateRoute'
 import FavoritesPage from './components/FavoritesPage'
 import UserProducts from './components/UserProducts'
+import Marketplace from './components/MarketPlace'
 
 export const router = createBrowserRouter([
     { path: "/", element: <App /> },
@@ -32,6 +33,6 @@ export const router = createBrowserRouter([
     { path: "/Spots", element: <Spots /> },
     { path: "/Spot/:spotId", element: <SpotPage /> },
     { path: "/Favoritos", element: <FavoritesPage /> },
-    { path: "/Productos", element: <UserProducts /> }
+    { path: "/Marketplace", element: <Marketplace /> }
 
 ])
