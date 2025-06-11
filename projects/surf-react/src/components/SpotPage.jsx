@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "./Navbar";
-import getCoordinatesFromPlaceNameGoogle from "../SpotInfo/Location";
-import getWeatherData from "../SpotInfo/Weather";
-import { client } from "../supabase/client";
 import { GoogleMap, LoadScriptNext, Marker } from "@react-google-maps/api";
 import { UserAuth } from "../context/AuthContext";
 import { Modal } from "react-bootstrap";
+
+import {
+  fetchSpotById,
+  fetchCoordinates,
+  fetchWeather,
+  fetchRecentSpotPosts,
+  uploadSpotPost,
+} from "../supabase/spotPageServices";
 
 const mapContainerStyle = {
   width: "100%",
@@ -30,100 +35,72 @@ function SpotPage() {
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
-    async function fetchSpot() {
-      const { data, error } = await client
-        .from("spots")
-        .select("*")
-        .eq("id", spotId)
-        .single();
-
-      if (error) {
+    async function loadSpotData() {
+      try {
+        const fetchedSpot = await fetchSpotById(spotId);
+        setSpot(fetchedSpot);
+      } catch (error) {
         console.error("Error al obtener el spot:", error.message);
-      } else {
-        setSpot(data);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
-    fetchSpot();
+    loadSpotData();
   }, [spotId]);
 
   useEffect(() => {
-    if (spot) {
-      const fullPlaceName = `${spot.name}, ${spot.Location}`;
-      getCoordinatesFromPlaceNameGoogle(fullPlaceName)
-        .then((coords) => setCoordinates(coords))
-        .catch((error) => console.error("Error obteniendo coordenadas:", error));
+    async function loadCoordinates() {
+      if (spot) {
+        try {
+          const coords = await fetchCoordinates(spot);
+          setCoordinates(coords);
+        } catch (error) {
+          console.error("Error obteniendo coordenadas:", error.message);
+        }
+      }
     }
+
+    loadCoordinates();
   }, [spot]);
 
   useEffect(() => {
-    if (coordinates) {
-      getWeatherData(coordinates.lat, coordinates.lng)
-        .then((data) => setWeatherData(data))
-        .catch((error) => console.error("Error obteniendo clima:", error));
+    async function loadWeather() {
+      if (coordinates) {
+        try {
+          const data = await fetchWeather(coordinates.lat, coordinates.lng);
+          setWeatherData(data);
+        } catch (error) {
+          console.error("Error obteniendo clima:", error.message);
+        }
+      }
     }
+
+    loadWeather();
   }, [coordinates]);
 
   useEffect(() => {
-    const fetchRecentPosts = async () => {
-      const { data, error } = await client
-        .from("spot_posts")
-        .select("id, comment, image_url, created_at, profiles(nombre, apellidos, photo_url)")
-        .eq("spot_id", spotId)
-        .order("created_at", { ascending: false })
-        .limit(3);
-
-      if (error) {
+    async function loadRecentPosts() {
+      try {
+        const posts = await fetchRecentSpotPosts(spotId);
+        setRecentPosts(posts);
+      } catch (error) {
         console.error("Error al obtener publicaciones recientes:", error.message);
-      } else {
-        setRecentPosts(data);
       }
-    };
-    
+    }
 
     if (spotId) {
-      fetchRecentPosts();
+      loadRecentPosts();
     }
   }, [spotId]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    console.log("📥 handleUpload ejecutado");
-
-    if (!session || !image || !comment) {
-      console.log("❌ Faltan datos:", { session, image, comment });
-      return;
-    }
+    if (!session || !image || !comment) return;
 
     try {
       setUploading(true);
-
-      const fileExt = image.name.split('.').pop();
-      const fileName = `${Date.now()}-${session.user.id}.${fileExt}`;
-      const filePath = `posts/${fileName}`;
-
-      let { error: uploadError } = await client.storage
-        .from("spot-posts")
-        .upload(filePath, image);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = client.storage
-        .from("spot-posts")
-        .getPublicUrl(filePath);
-
-      const { error: insertError } = await client
-        .from("spot_posts")
-        .insert({
-          user_id: session.user.id,
-          spot_id: spot.id,
-          comment,
-          image_url: publicUrl,
-        });
-
-      if (insertError) throw insertError;
-
+      await uploadSpotPost({ session, spot, comment, image });
       alert("¡Publicación subida con éxito!");
       setComment("");
       setImage(null);
@@ -181,24 +158,19 @@ function SpotPage() {
               <h4 className="mb-4">Condiciones meteorológicas (última hora)</h4>
               <div className="row">
                 <div className="col-md-6 mb-3">
-                  <strong>Altura de ola:</strong>{" "}
-                  {weatherData?.waveHeight?.sg ?? "N/D"} m
+                  <strong>Altura de ola:</strong> {weatherData?.waveHeight?.sg ?? "N/D"} m
                 </div>
                 <div className="col-md-6 mb-3">
-                  <strong>Periodo de ola:</strong>{" "}
-                  {weatherData?.wavePeriod?.sg ?? "N/D"} s
+                  <strong>Periodo de ola:</strong> {weatherData?.wavePeriod?.sg ?? "N/D"} s
                 </div>
                 <div className="col-md-6 mb-3">
-                  <strong>Dirección de ola:</strong>{" "}
-                  {weatherData?.waveDirection?.sg ?? "N/D"}°
+                  <strong>Dirección de ola:</strong> {weatherData?.waveDirection?.sg ?? "N/D"}°
                 </div>
                 <div className="col-md-6 mb-3">
-                  <strong>Velocidad del viento:</strong>{" "}
-                  {weatherData?.windSpeed?.sg ?? "N/D"} m/s
+                  <strong>Velocidad del viento:</strong> {weatherData?.windSpeed?.sg ?? "N/D"} m/s
                 </div>
                 <div className="col-md-6 mb-3">
-                  <strong>Dirección del viento:</strong>{" "}
-                  {weatherData?.windDirection?.sg ?? "N/D"}°
+                  <strong>Dirección del viento:</strong> {weatherData?.windDirection?.sg ?? "N/D"}°
                 </div>
               </div>
             </div>
@@ -226,7 +198,8 @@ function SpotPage() {
                 </LoadScriptNext>
               </div>
             )}
-            <br/>
+
+            <br />
             <h2 className="mb-5 text-center">Actualizaciones de la zona realizadas por los usuarios</h2>
             {recentPosts.length > 0 ? (
               <div className="container">
@@ -277,20 +250,10 @@ function SpotPage() {
               <p className="mt-4 text-muted text-center">No hay publicaciones aún.</p>
             )}
 
-            <Modal
-              show={!!selectedImage}
-              onHide={() => setSelectedImage(null)}
-              centered
-              size="lg"
-            >
-              <Modal.Header closeButton>
-              </Modal.Header>
+            <Modal show={!!selectedImage} onHide={() => setSelectedImage(null)} centered size="lg">
+              <Modal.Header closeButton></Modal.Header>
               <Modal.Body className="text-center bg-dark">
-                <img
-                  src={selectedImage}
-                  alt="Vista ampliada"
-                  className="img-fluid rounded"
-                />
+                <img src={selectedImage} alt="Vista ampliada" className="img-fluid rounded" />
               </Modal.Body>
             </Modal>
 
@@ -318,11 +281,7 @@ function SpotPage() {
                       required
                     />
                   </div>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={uploading}
-                  >
+                  <button type="submit" className="btn btn-primary" disabled={uploading}>
                     {uploading ? "Subiendo..." : "Publicar"}
                   </button>
                 </form>
