@@ -7,7 +7,6 @@ import ProfileHeader from "./ProfileHeader";
 import Gallery from "./Gallery";
 import PhotoUploader from "./PhotoUploader";
 import FollowStats from "./FollowStats";
-import UserProducts from "./UserProducts";
 
 import { Spinner, Card } from "react-bootstrap";
 
@@ -223,7 +222,6 @@ function Profile() {
             setSelectedPhoto={setSelectedPhoto}
             onDelete={isOwnProfile ? handleDeletePhoto : undefined}
           />
-          <UserProducts userId={userId} isOwnProfile={isOwnProfile} />
         </Card>
         
       </div>
