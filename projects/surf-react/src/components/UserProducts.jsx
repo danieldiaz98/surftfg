@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
-import { client } from "../supabase/client";
 import { Modal } from "react-bootstrap";
+import {
+  fetchUserProducts,
+  uploadProductImages,
+  insertProduct,
+  deleteProduct,
+  updateProduct,
+} from "../supabase/userProductServices";
 
 function UserProducts({ userId, isOwnProfile }) {
   const [products, setProducts] = useState([]);
@@ -19,23 +25,22 @@ function UserProducts({ userId, isOwnProfile }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const { data, error } = await client
-        .from("products")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
+    if (!userId) return;
 
-      if (!error) setProducts(data);
-      else console.error("Error al obtener productos:", error.message);
+    const load = async () => {
+      try {
+        const data = await fetchUserProducts(userId);
+        setProducts(data);
+      } catch (error) {
+        console.error("Error al obtener productos:", error.message);
+      }
     };
 
-    if (userId) fetchProducts();
+    load();
   }, [userId]);
 
   const handleProductUpload = async (e) => {
     e.preventDefault();
-
     const { title, description, price, images } = newProduct;
 
     if (!title || !description || !price || images.length === 0) {
@@ -50,46 +55,12 @@ function UserProducts({ userId, isOwnProfile }) {
 
     try {
       setUploading(true);
-      const imageUrls = [];
+      const imageUrls = await uploadProductImages(images);
+      await insertProduct({ userId, title, description, price, image_urls: imageUrls });
 
-      for (let image of images) {
-        const fileExt = image.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-        const filePath = `products/${fileName}`;
-
-        const { error: uploadError } = await client.storage
-          .from("products-imgs")
-          .upload(filePath, image);
-
-        if (uploadError) throw uploadError;
-
-        const { data } = client.storage
-          .from("products-imgs")
-          .getPublicUrl(filePath);
-
-        imageUrls.push(data.publicUrl);
-      }
-
-      const { error: insertError } = await client
-        .from("products")
-        .insert({
-          user_id: userId,
-          title,
-          description,
-          price: parseFloat(price),
-          image_urls: imageUrls,
-        });
-
-      if (insertError) throw insertError;
-
+      const updated = await fetchUserProducts(userId);
+      setProducts(updated);
       setNewProduct({ title: "", description: "", price: "", images: [] });
-      const { data: updatedProducts } = await client
-        .from("products")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
-
-      setProducts(updatedProducts);
     } catch (error) {
       console.error("Error al subir producto:", error.message);
     } finally {
@@ -101,21 +72,7 @@ function UserProducts({ userId, isOwnProfile }) {
     if (!window.confirm("¿Eliminar este producto?")) return;
 
     try {
-      const paths = imageUrls.map((url) => url.split("/products-imgs/")[1]);
-
-      const { error: deleteImageError } = await client.storage
-        .from("products-imgs")
-        .remove(paths);
-
-      if (deleteImageError) throw deleteImageError;
-
-      const { error: deleteDbError } = await client
-        .from("products")
-        .delete()
-        .eq("id", productId);
-
-      if (deleteDbError) throw deleteDbError;
-
+      await deleteProduct(productId, imageUrls);
       setProducts(products.filter((p) => p.id !== productId));
     } catch (error) {
       console.error("Error al eliminar producto:", error.message);
@@ -137,27 +94,10 @@ function UserProducts({ userId, isOwnProfile }) {
   };
 
   const saveEditedProduct = async (productId) => {
-    const { title, description, price } = editedProduct;
-
     try {
-      const { error } = await client
-        .from("products")
-        .update({
-          title,
-          description,
-          price: parseFloat(price),
-        })
-        .eq("id", productId);
-
-      if (error) throw error;
-
-      const { data: updatedProducts } = await client
-        .from("products")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
-
-      setProducts(updatedProducts);
+      await updateProduct(productId, editedProduct);
+      const updated = await fetchUserProducts(userId);
+      setProducts(updated);
       cancelEditing();
     } catch (error) {
       console.error("Error al editar producto:", error.message);
@@ -318,6 +258,7 @@ function UserProducts({ userId, isOwnProfile }) {
           <p className="text-muted">No hay productos publicados.</p>
         )}
       </div>
+
       <Modal show={showImageModal} onHide={handleCloseModal} centered size="lg">
         <Modal.Header closeButton />
         <Modal.Body className="text-center position-relative">
