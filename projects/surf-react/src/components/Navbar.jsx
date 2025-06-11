@@ -53,6 +53,9 @@ function Navbar() {
                 <li className="nav-item">
                   <Link to="/Perfil" className="nav-link" onClick={() => setExpanded(false)}>Perfil</Link>
                 </li>
+                <li className="nav-item">
+                  <Link to="/Productos" className="nav-link" onClick={() => setExpanded(false)}>Productos</Link>
+                </li>
               </>
             )}
           </ul>
