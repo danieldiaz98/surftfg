@@ -2,9 +2,6 @@ import { client } from "../supabase/client";
 import getCoordinatesFromPlaceNameGoogle from "../SpotInfo/Location";
 import getWeatherData from "../SpotInfo/Weather";
 
-/**
- * Obtiene un spot por ID
- */
 export async function fetchSpotById(spotId) {
   const { data, error } = await client
     .from("spots")
@@ -16,39 +13,26 @@ export async function fetchSpotById(spotId) {
   return data;
 }
 
-/**
- * Obtiene coordenadas a partir del nombre del lugar
- */
 export async function fetchCoordinates(spot) {
   const fullPlaceName = `${spot.name}, ${spot.Location}`;
   return await getCoordinatesFromPlaceNameGoogle(fullPlaceName);
 }
 
-/**
- * Obtiene el clima actual
- */
 export async function fetchWeather(lat, lng) {
   return await getWeatherData(lat, lng);
 }
 
-/**
- * Obtiene los posts recientes de un spot
- */
 export async function fetchRecentSpotPosts(spotId) {
   const { data, error } = await client
     .from("spot_posts")
     .select("id, comment, image_url, created_at, profiles(nombre, apellidos, photo_url)")
     .eq("spot_id", spotId)
-    .order("created_at", { ascending: false })
-    .limit(3);
+    .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
   return data;
 }
 
-/**
- * Sube una publicación al spot
- */
 export async function uploadSpotPost({ session, spot, comment, image }) {
   const fileExt = image.name.split(".").pop();
   const fileName = `${Date.now()}-${session.user.id}.${fileExt}`;
