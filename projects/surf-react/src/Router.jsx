@@ -10,7 +10,6 @@ import FollowList from './components/FollowList'
 import UserExplorer from './components/UserExplorer'
 import PrivateRoute from './components/PrivateRoute'
 import FavoritesPage from './components/FavoritesPage'
-import UserProducts from './components/UserProducts'
 import Marketplace from './components/MarketPlace'
 
 export const router = createBrowserRouter([

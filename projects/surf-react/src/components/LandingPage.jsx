@@ -1,11 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import heroImage from "../assets/surf-hero.jpg"; // Asegúrate de tener una imagen en esta ruta
+import heroImage from "../assets/surf-hero.jpg";
 
 function LandingPage() {
   return (
     <div>
-      {/* Hero Section */}
       <header
         className="bg-dark text-white text-center"
         style={{
@@ -57,7 +56,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-light py-4 text-center text-muted">
         <p>&copy; {new Date().getFullYear()} Waver. Todos los derechos reservados.</p>
       </footer>

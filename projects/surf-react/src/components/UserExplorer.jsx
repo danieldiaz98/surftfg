@@ -70,7 +70,6 @@ function UserExplorer() {
     }
   };
 
-  // 🔍 Filtrar usuarios por texto de búsqueda
   const filteredUsers = users.filter((user) => {
     const fullName = `${user.nombre} ${user.apellidos}`.toLowerCase();
     return fullName.includes(searchText.toLowerCase());

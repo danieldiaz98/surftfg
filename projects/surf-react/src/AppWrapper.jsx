@@ -1,4 +1,3 @@
-// src/AppWrapper.jsx
 import { Spinner } from "react-bootstrap";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./Router";

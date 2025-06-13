@@ -8,7 +8,6 @@ function SpotCard({ id, name, location, imageUrl }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Chequear si ya está en favoritos al montar
   useEffect(() => {
     if (!session) {
       setIsFavorite(false);
@@ -44,7 +43,6 @@ function SpotCard({ id, name, location, imageUrl }) {
     setLoading(true);
     try {
       if (isFavorite) {
-        // Quitar favorito
         const { error } = await client
           .from("favorite_spots")
           .delete()

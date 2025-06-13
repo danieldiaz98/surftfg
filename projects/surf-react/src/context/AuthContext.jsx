@@ -4,7 +4,7 @@ import { client } from "../supabase/client";
 const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
-  const [session, setSession] = useState(undefined); // undefined para saber si aún está cargando
+  const [session, setSession] = useState(undefined);
 
   useEffect(() => {
     const getSession = async () => {
@@ -64,7 +64,7 @@ export const AuthContextProvider = ({ children }) => {
     if (error) {
       console.error("Error al cerrar sesión:", error);
     }
-    setSession(null); // Limpia el estado local también
+    setSession(null);
   };
 
   return (

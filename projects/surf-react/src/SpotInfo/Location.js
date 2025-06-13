@@ -1,5 +1,5 @@
 async function getCoordinatesFromPlaceNameGoogle(placeName) {
-  const apiKey = 'AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw'; // Asegúrate de proteger esta clave en producción
+  const apiKey = 'AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw';
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName)}&key=${apiKey}`;
 
   try {

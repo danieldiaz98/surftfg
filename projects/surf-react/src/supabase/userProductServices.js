@@ -1,6 +1,5 @@
 import { client } from "../supabase/client";
 
-// Obtener productos de un usuario
 export const fetchUserProducts = async (userId) => {
   const { data, error } = await client
     .from("products")
@@ -12,7 +11,6 @@ export const fetchUserProducts = async (userId) => {
   return data;
 };
 
-// Subir imágenes al bucket de Supabase
 export const uploadProductImages = async (images) => {
   const urls = [];
 
@@ -37,7 +35,6 @@ export const uploadProductImages = async (images) => {
   return urls;
 };
 
-// Insertar nuevo producto
 export const insertProduct = async ({ userId, title, description, price, image_urls }) => {
   const { error } = await client
     .from("products")
@@ -52,7 +49,6 @@ export const insertProduct = async ({ userId, title, description, price, image_u
   if (error) throw new Error(error.message);
 };
 
-// Eliminar producto e imágenes
 export const deleteProduct = async (productId, imageUrls) => {
   const paths = imageUrls.map((url) => url.split("/products-imgs/")[1]);
 
@@ -70,7 +66,6 @@ export const deleteProduct = async (productId, imageUrls) => {
   if (deleteDbError) throw new Error(deleteDbError.message);
 };
 
-// Editar producto
 export const updateProduct = async (productId, { title, description, price }) => {
   const { error } = await client
     .from("products")
