@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import heroImage from "../assets/surf-hero.jpg";
+import { UserAuth } from "../context/AuthContext";
 
 function LandingPage() {
+  const { session } = UserAuth();
+
   return (
     <div>
       <header
@@ -21,9 +24,11 @@ function LandingPage() {
         <h1 className="display-3 fw-bold">Bienvenido a Waver</h1>
         <p className="lead">Tu comunidad de surfistas, spots y condiciones en tiempo real</p>
         <div className="mt-4">
-          <Link to="/Registro" className="btn btn-primary btn-lg mx-2">
-            Regístrate
-          </Link>
+          {!session && (
+            <Link to="/Registro" className="btn btn-primary btn-lg mx-2">
+              Regístrate
+            </Link>
+          )}
           <Link to="/spots" className="btn btn-outline-light btn-lg mx-2">
             Ver Spots
           </Link>
