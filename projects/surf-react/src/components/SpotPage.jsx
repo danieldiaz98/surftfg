@@ -32,6 +32,7 @@ function SpotPage() {
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [recentPosts, setRecentPosts] = useState([]);
+  const [visiblePosts, setVisiblePosts] = useState(6);
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
@@ -205,7 +206,7 @@ function SpotPage() {
               <div className="container">
                 <h4 className="mb-4">Últimas publicaciones</h4>
                 <div className="row g-4">
-                  {recentPosts.map((post) => (
+                  {recentPosts.slice(0, visiblePosts).map((post) => (
                     <div key={post.id} className="col-md-4">
                       <div className="card h-100 shadow-sm">
                         <img
@@ -244,6 +245,18 @@ function SpotPage() {
                       </div>
                     </div>
                   ))}
+
+                {visiblePosts < recentPosts.length && (
+                  <div className="text-center mt-4">
+                    <button
+                      className="btn btn-outline-primary"
+                      onClick={() => setVisiblePosts((prev) => prev + 5)}
+                    >
+                      Ver más publicaciones
+                    </button>
+                  </div>
+                )}
+
                 </div>
               </div>
             ) : (
