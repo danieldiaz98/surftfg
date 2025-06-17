@@ -1,12 +1,12 @@
 async function getWeatherData(lat, lng) {
   const params = 'waveDirection,wavePeriod,waveHeight,windSpeed,windDirection';
-
+  const apiKey = import.meta.env.VITE_STORMGLASS_API_KEY;
   try {
     const response = await fetch(
       `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lng}&params=${params}&source=sg`,
       {
         headers: {
-          'Authorization': 'a0deb85a-04f4-11f0-b8ac-0242ac130003-a0deb8be-04f4-11f0-b8ac-0242ac130003'
+          'Authorization': apiKey
         }
       }
     );

@@ -19,7 +19,8 @@ const center = {
 };
 
 function SpotsMap() {
-  const apiKey = 'AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw';
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  console.log("API Key:", apiKey);
   const [spots, setSpots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSpot, setSelectedSpot] = useState(null);

@@ -1,5 +1,5 @@
 async function getCoordinatesFromPlaceNameGoogle(placeName) {
-  const apiKey = 'AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw';
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(placeName)}&key=${apiKey}`;
 
   try {

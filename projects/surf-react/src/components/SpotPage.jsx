@@ -22,6 +22,7 @@ const mapContainerStyle = {
 };
 
 function SpotPage() {
+  const apikey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const { spotId } = useParams();
   const { session } = UserAuth();
   const [spot, setSpot] = useState(null);
@@ -179,7 +180,7 @@ function SpotPage() {
             {coordinates && (
               <div className="mt-5">
                 <h4 className="mb-3">Ubicación en el mapa</h4>
-                <LoadScriptNext googleMapsApiKey={'AIzaSyDoc4OW1DbayNM87H7QX5LGiwxouWZDzSw'}>
+                <LoadScriptNext googleMapsApiKey={apikey}>
                   <GoogleMap
                     mapContainerStyle={mapContainerStyle}
                     center={coordinates}
