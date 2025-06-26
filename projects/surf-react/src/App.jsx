@@ -1,7 +1,6 @@
 import Navbar from "./components/Navbar";
 import SpotCard from "./components/SpotCard";
 import LandingPage from "./components/LandingPage";
-import "./App.css"
 import { getAllSpots } from "./supabase/spotServices";
 import { useEffect, useState } from "react";
 
