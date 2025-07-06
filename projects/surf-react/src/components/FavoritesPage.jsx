@@ -17,7 +17,6 @@ function FavoritesPage() {
       setFavorites(spots);
       setLoading(false);
     };
-
     fetchFavorites();
   }, [session]);
 
@@ -48,7 +47,7 @@ function FavoritesPage() {
                 <SpotCard
                   id={spot.id}
                   name={spot.name}
-                  location={spot.location}
+                  location={spot.Location}
                   imageUrl={spot.image_url}
                 />
               </div>

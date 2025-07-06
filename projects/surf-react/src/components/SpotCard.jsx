@@ -7,7 +7,6 @@ function SpotCard({ id, name, location, imageUrl }) {
   const { session } = UserAuth();
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     if (!session) {
       setIsFavorite(false);
